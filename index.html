@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sejal Jain — Marketing Designer &amp; Brand Strategist</title>
+<meta name="description" content="Sejal Jain is a Mumbai-based marketing designer and brand strategist who makes brands easier to understand and harder to forget.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Hanken+Grotesk:wght@400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400..700&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+  .stage {
+    position: relative;
+    min-height: max(100svh, 680px);
+    padding: 96px var(--gutter-r) 80px var(--gutter-l);
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+  }
+  .intro { position: relative; z-index: 2; max-width: 720px; text-align: center; }
+  .intro .label { color: var(--tomato); margin: 0 0 22px; }
+  .intro h1 { font-size: clamp(42px, 6.4vw, 92px); margin: 0 0 26px; }
+  .intro p.lede { max-width: 520px; margin: 0 auto; font-size: clamp(16px, 1.4vw, 18px); color: var(--ink-soft); }
+
+  .obj {
+    position: absolute;
+    left: var(--x); top: var(--y);
+    width: calc(clamp(96px, 11.5vw, 176px) * var(--s, 1));
+    aspect-ratio: 1;
+    translate: -50% -50%;
+    rotate: var(--r, 0deg);
+    text-decoration: none;
+    z-index: 3;
+  }
+  .obj .float { display: block; width: 100%; height: 100%; animation: bob 6s ease-in-out infinite; animation-delay: var(--d, 0s); }
+  .obj .drawing { transition: transform .5s var(--spring); }
+  .obj:hover .drawing, .obj:focus-visible .drawing { transform: scale(1.08); animation: wiggle .6s var(--ease); }
+  .obj .obj-label {
+    position: absolute; left: 50%; top: 100%;
+    translate: -50% 6px;
+    white-space: nowrap;
+    font-size: clamp(20px, 1.7vw, 26px);
+    font-style: italic;
+    opacity: 0; transform: translateY(-6px);
+    transition: opacity .3s var(--ease), transform .4s var(--spring);
+    pointer-events: none;
+  }
+  .obj .obj-label::after { content: " \2192"; font-style: normal; color: var(--tomato); }
+  .obj:hover .obj-label, .obj:focus-visible .obj-label { opacity: 1; transform: none; }
+  .obj.deco { z-index: 1; pointer-events: none; }
+  @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(1.5deg); } }
+
+  .edge {
+    position: absolute; top: 50%;
+    writing-mode: vertical-rl;
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
+    border-left: 1.5px solid var(--ink); padding-left: 8px;
+    z-index: 2;
+  }
+  .edge--l { left: var(--gutter-l); transform: translateY(-50%) rotate(180deg); border-left: 0; border-right: 1.5px solid var(--ink); padding: 0 8px 0 0; }
+  .edge--r { right: var(--gutter-r); transform: translateY(-50%); }
+
+  .scroll-hint { position: absolute; bottom: 74px; left: 50%; translate: -50% 0; z-index: 2; color: var(--ink-soft); }
+
+  @media (max-width: 760px) {
+    .stage { display: block; padding-top: 110px; }
+    .intro { text-align: left; }
+    .intro p.lede { margin: 0; }
+    .edge, .scroll-hint, .obj.deco { display: none; }
+    .objects { display: grid; grid-template-columns: 1fr 1fr; gap: 44px 16px; margin-top: 48px; }
+    .obj { position: relative; left: auto; top: auto; translate: none; width: 100%; max-width: 150px; justify-self: center; }
+    .obj .obj-label { opacity: 1; transform: none; font-size: 20px; }
+  }
+</style>
+</head>
+<body data-page="home">
+<main class="page">
+  <section class="stage" id="stage">
+    <div class="intro">
+      <p class="label">Marketing Designer &amp; Brand Strategist</p>
+      <h1 class="display">I make brands easier to
+        <span class="scribble u">understand<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12 C40 4 80 16 120 9 S180 6 198 11" stroke="var(--tomato)"/></svg></span>,
+        and harder to
+        <span class="scribble o"><em>forget</em><svg viewBox="0 0 200 80" preserveAspectRatio="none" aria-hidden="true"><path d="M150 8 C90 -2 18 10 8 40 C0 70 90 80 160 70 C210 62 200 18 120 10" stroke="var(--sky)" style="animation-delay:.5s"/></svg></span>.
+      </h1>
+      <p class="lede">I&rsquo;m Sejal Jain. For four years I&rsquo;ve shaped how SaaS and D2C brands look, read and rank, from the design systems people scroll through to the strategy that decides what they say.</p>
+    </div>
+
+    <div class="objects" id="objects">
+      <a class="obj" href="case-studies.html" style="--x:17%;--y:24%;--r:-8deg;--d:0s" data-depth="18">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-sketchbook"/></svg></span>
+        <span class="obj-label display">Case studies</span>
+      </a>
+      <a class="obj" href="work.html" style="--x:81%;--y:22%;--r:6deg;--d:-1.5s" data-depth="26">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-photos"/></svg></span>
+        <span class="obj-label display">Selected work</span>
+      </a>
+      <a class="obj" href="about.html" style="--x:87%;--y:66%;--r:-10deg;--d:-3s" data-depth="14">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-mirror"/></svg></span>
+        <span class="obj-label display">About me</span>
+      </a>
+      <a class="obj" href="#contact" style="--x:14%;--y:72%;--r:7deg;--d:-2s" data-depth="22">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-envelope"/></svg></span>
+        <span class="obj-label display">Say hello</span>
+      </a>
+      <a class="obj" href="resume.pdf" target="_blank" rel="noopener" style="--x:66%;--y:84%;--r:12deg;--s:.82;--d:-4s" data-depth="16">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-resume"/></svg></span>
+        <span class="obj-label display">Resume</span>
+      </a>
+      <span class="obj deco" style="--x:36%;--y:86%;--r:-4deg;--s:.78;--d:-1s" data-depth="30" aria-hidden="true">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200"><use href="#d-pencil"/></svg></span>
+      </span>
+      <span class="obj deco" style="--x:62%;--y:13%;--r:10deg;--s:.72;--d:-2.5s" data-depth="10" aria-hidden="true">
+        <span class="float"><svg class="drawing" viewBox="0 0 200 200"><use href="#d-lantana"/></svg></span>
+      </span>
+    </div>
+
+    <span class="edge edge--l">Mumbai, India</span>
+    <span class="edge edge--r">Portfolio &middot; 2026</span>
+  </section>
+</main>
+
+<script src="assets/js/drawings.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+  /* Objects drift gently away from the cursor, each at its own depth */
+  (function () {
+    if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var objs = [].slice.call(document.querySelectorAll('#objects .obj'));
+    var tx = 0, ty = 0, cx = 0, cy = 0;
+    addEventListener('mousemove', function (e) {
+      tx = (e.clientX / innerWidth - 0.5) * 2;
+      ty = (e.clientY / innerHeight - 0.5) * 2;
+    }, { passive: true });
+    (function loop() {
+      cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
+      objs.forEach(function (o) {
+        var d = +o.getAttribute('data-depth') || 15;
+        o.style.transform = 'translate(' + (-cx * d) + 'px,' + (-cy * d) + 'px)';
+      });
+      requestAnimationFrame(loop);
+    })();
+  })();
+</script>
+</body>
+</html>

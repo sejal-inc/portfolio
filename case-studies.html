@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Case studies — Sejal Jain</title>
+<meta name="description" content="Three case studies by Sejal Jain: a SaaS blog people finish, product pages that help shoppers choose, and a concept built around an invasive weed.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Hanken+Grotesk:wght@400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400..700&display=swap">
+<link rel="stylesheet" href="assets/css/site.css">
+<style>
+  .cs-head {
+    padding: clamp(120px, 18vh, 180px) var(--gutter-r) clamp(56px, 8vw, 96px) var(--gutter-l);
+    max-width: 1240px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr minmax(0, 360px); gap: 32px; align-items: end;
+  }
+  .cs-head h1 { font-size: clamp(48px, 8vw, 120px); margin: 14px 0 0; }
+  .cs-head h1 em { color: var(--tomato); }
+  .cs-head p { margin: 0; color: var(--ink-soft); }
+
+  .wipe { position: relative; height: calc(var(--n) * 100svh); }
+  .wipe-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+  .slide {
+    position: absolute; inset: 0;
+    background: var(--bg);
+    clip-path: inset(0 0 calc(var(--hide, 1) * 100%) 0);
+    padding: 96px var(--gutter-r) 72px var(--gutter-l);
+  }
+  .slide:first-child { --hide: 0; }
+  .slide-grid {
+    height: 100%; max-width: 1280px; margin: 0 auto;
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr) minmax(0, .8fr);
+    gap: clamp(20px, 3vw, 48px); align-items: center;
+  }
+  .slide .num { font-family: var(--display); font-variation-settings: var(--display-vars); font-size: 20px; }
+  .slide h2 { font-size: clamp(38px, 4.6vw, 70px); margin: 12px 0 18px; }
+  .slide h2 em { color: var(--accent); }
+  .slide .meta { margin: 0 0 20px; }
+  .slide .result {
+    font-size: clamp(16px, 1.3vw, 19px); line-height: 1.4; margin: 0 0 26px;
+    padding-left: 14px; border-left: 3px solid var(--accent);
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 12px 20px; border-radius: 999px;
+    background: var(--ink); color: var(--paper); text-decoration: none; font-weight: 600; font-size: 14px;
+    transition: transform .4s var(--spring), background .25s;
+  }
+  .btn:hover { transform: translateY(-3px) rotate(-1.5deg); background: var(--accent, var(--tomato)); }
+  .frame {
+    position: relative; justify-self: center;
+    width: min(100%, 440px); aspect-ratio: 4 / 5;
+    border-radius: 50%;
+    background: var(--accent);
+    display: grid; place-items: center;
+    transform: scale(calc(.86 + var(--r, 1) * .14)) rotate(calc((1 - var(--r, 1)) * -8deg));
+  }
+  .frame .drawing { width: 64%; height: 64%; }
+  .slide .side { align-self: end; font-size: 15px; color: var(--ink-soft); max-width: 300px; }
+  .slide .side .label { color: var(--ink); display: block; margin-bottom: 8px; }
+
+  .wipe-line {
+    position: absolute; left: 0; right: 0; top: 0; height: 0;
+    border-top: 2px solid var(--ink);
+    z-index: 5; opacity: 0; pointer-events: none;
+  }
+  .wipe-count { position: absolute; z-index: 6; left: 50%; bottom: 22px; translate: -50% 0; display: flex; gap: 6px; }
+  .wipe-count i { width: 26px; height: 4px; border-radius: 2px; background: color-mix(in srgb, var(--ink) 20%, transparent); transition: background .3s; }
+  .wipe-count i.on { background: var(--ink); }
+
+  @media (max-width: 900px) {
+    .cs-head { grid-template-columns: 1fr; }
+    .slide { padding-top: 84px; padding-bottom: 56px; }
+    .slide-grid { grid-template-columns: 1fr; grid-template-rows: auto auto; align-content: center; gap: 18px; }
+    .slide .frame { order: -1; width: min(52vw, 240px); }
+    .slide .side { display: none; }
+    .slide h2 { margin: 8px 0 12px; }
+    .slide .result { margin-bottom: 18px; }
+  }
+</style>
+</head>
+<body data-page="case-studies">
+<main class="page">
+  <header class="cs-head">
+    <div>
+      <p class="label" style="color:var(--tomato);margin:0">Case studies</p>
+      <h1 class="display">Three problems, worked through <em>slowly</em>.</h1>
+    </div>
+    <p>Each one starts with the people on the other side of the screen: what they read, what they trust, and what makes them stay. Scroll to move through them.</p>
+  </header>
+
+  <section class="wipe" id="wipe" style="--n:3">
+    <div class="wipe-stage">
+      <article class="slide" style="--bg:var(--cream);--accent:var(--tomato)">
+        <div class="slide-grid">
+          <div>
+            <span class="num">01</span>
+            <h2 class="display">A blog people actually <em>finish</em>.</h2>
+            <p class="meta label muted">Global spend-management SaaS &middot; 2023 &ndash; now</p>
+            <p class="result">Three blog design systems through two rebrands. Most posts rank #1 on search.</p>
+            <a class="btn" href="saas-blog.html">Read the case study <span aria-hidden="true">&rarr;</span></a>
+          </div>
+          <div class="frame"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-blog"/></svg></div>
+          <p class="side"><span class="label">In short</span>I built the blog&rsquo;s visual language from scratch, then rebuilt it twice as the brand changed, breaking long reads into visuals people stop for. Competitors adopted the format.</p>
+        </div>
+      </article>
+
+      <article class="slide" style="--bg:var(--sky);--accent:var(--forest)">
+        <div class="slide-grid">
+          <div>
+            <span class="num">02</span>
+            <h2 class="display">Words that help people <em>choose</em>.</h2>
+            <p class="meta label muted">D2C textile brand &middot; Freelance, 2026</p>
+            <p class="result">Most collection pages now rank #1, with core category terms in the top three.</p>
+            <a class="btn" href="textile-brand.html">Read the case study <span aria-hidden="true">&rarr;</span></a>
+          </div>
+          <div class="frame" style="background:var(--butter)"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-textile"/></svg></div>
+          <p class="side"><span class="label">In short</span>A product description framework, a naming system, claim badges in place of paragraphs, and product pages shaped by how shoppers actually read.</p>
+        </div>
+      </article>
+
+      <article class="slide" style="--bg:var(--butter);--accent:var(--tomato)">
+        <div class="slide-grid">
+          <div>
+            <span class="num">03</span>
+            <h2 class="display">An invasive weed, worth <em>bidding</em> on.</h2>
+            <p class="meta label muted">Passion project &middot; Since 2023</p>
+            <p class="result">A concept catalogue, campaign and invite-only auction for one-of-a-kind lantana furniture.</p>
+            <a class="btn" href="lantana.html">Read the case study <span aria-hidden="true">&rarr;</span></a>
+          </div>
+          <div class="frame" style="background:var(--blush)"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-chair"/></svg></div>
+          <p class="side"><span class="label">In short</span>Lantana camara chokes the Western Ghats. The Soliga uproot it and turn it into furniture. This is my long-running idea for giving that work the audience it deserves.</p>
+        </div>
+      </article>
+
+      <div class="wipe-line" id="wipeLine"></div>
+      <div class="wipe-count" id="wipeCount" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+    </div>
+  </section>
+</main>
+
+<script src="assets/js/drawings.js"></script>
+<script src="assets/js/site.js"></script>
+<script>
+  /* Scroll wipe: the section stays pinned; a line sweeps down and reveals the next study above it.
+     Each step holds still for a beat (so the copy can be read) before the line moves. */
+  (function () {
+    var wipe = document.getElementById('wipe');
+    var slides = [].slice.call(wipe.querySelectorAll('.slide'));
+    var line = document.getElementById('wipeLine');
+    var ticks = [].slice.call(document.querySelectorAll('#wipeCount i'));
+    var n = slides.length, lastActive = 0;
+    function clamp(v) { return Math.max(0, Math.min(1, v)); }
+    function ease(t) { return t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+    function update() {
+      var rect = wipe.getBoundingClientRect();
+      var total = wipe.offsetHeight - innerHeight;
+      var p = clamp(-rect.top / total) * (n - 1);
+      var lineAt = -1, active = 0;
+      slides.forEach(function (s, i) {
+        if (i === 0) { s.style.setProperty('--r', 1); return; }
+        var t = clamp((p - (i - 1) - 0.25) / 0.65);
+        var r = ease(t);
+        s.style.setProperty('--hide', 1 - r);
+        s.style.setProperty('--r', r);
+        if (r > 0 && r < 1) lineAt = r;
+        if (r >= 0.5) active = i;
+      });
+      line.style.opacity = lineAt >= 0 ? 1 : 0;
+      if (lineAt >= 0) line.style.transform = 'translateY(' + (lineAt * innerHeight) + 'px)';
+      ticks.forEach(function (t, i) { t.classList.toggle('on', i === active); });
+      if (active !== lastActive && window.SJSound) { window.SJSound.swoosh(); lastActive = active; }
+    }
+    addEventListener('scroll', update, { passive: true });
+    addEventListener('resize', update);
+    update();
+  })();
+</script>
+</body>
+</html>
