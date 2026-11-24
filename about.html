@@ -5,107 +5,55 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>About — Sejal Jain</title>
 <meta name="description" content="About Sejal Jain, a Mumbai-based marketing designer and brand strategist trained in visual communication at UID Gandhinagar.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Hanken+Grotesk:wght@400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400..700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css">
-<style>
-  .a-wrap { overflow-x: clip; max-width: 1240px; margin: 0 auto; padding: clamp(110px, 16vh, 160px) var(--gutter-r) clamp(64px, 10vw, 120px) var(--gutter-l); }
-  .a-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); align-items: start; }
-
-  .collage { position: relative; aspect-ratio: 1 / 1.08; }
-  .collage > * { position: absolute; }
-  .collage .ph { box-shadow: 0 22px 40px -26px color-mix(in srgb, var(--ink) 55%, transparent); transition: transform .6s var(--spring); }
-  .collage .ph:hover { transform: rotate(0deg) scale(1.04) !important; z-index: 9; }
-  .c1 { left: 6%; top: 4%; width: 46%; aspect-ratio: 3 / 4; border-radius: 999px 999px 26px 26px; background: var(--tomato); transform: rotate(-5deg); }
-  .c2 { right: 4%; top: 12%; width: 40%; aspect-ratio: 1; border-radius: 50%; background: var(--sky); transform: rotate(6deg); }
-  .c3 { left: 30%; bottom: 4%; width: 44%; aspect-ratio: 4 / 3; border-radius: 26px; background: var(--butter); transform: rotate(3deg); z-index: 2; }
-  .c4 { left: 0; bottom: 14%; width: 26%; aspect-ratio: 3 / 4; border-radius: 50%; background: var(--blush); transform: rotate(-9deg); }
-  .collage .ph-note { font-size: 9.5px; }
-  .collage .drawing.d1 { right: 0; bottom: 6%; width: 26%; transform: rotate(14deg); z-index: 3; }
-  .collage .drawing.d2 { left: 44%; top: -3%; width: 18%; transform: rotate(-12deg); z-index: 3; }
-  .collage .piece { right: 30%; top: 48%; width: 11%; color: var(--forest); transform: rotate(18deg); z-index: 4; animation: wiggle 4s var(--ease) infinite; }
-  .collage .tape { width: 70px; height: 20px; background: color-mix(in srgb, var(--cream) 80%, transparent); border: 1px solid color-mix(in srgb, var(--ink) 15%, transparent); z-index: 5; }
-  .tape.t1 { left: 22%; top: 2%; transform: rotate(-14deg); }
-  .tape.t2 { right: 14%; top: 10%; transform: rotate(22deg); }
-
-  .bio h1 { font-size: clamp(44px, 6vw, 88px); margin: 12px 0 28px; }
-  .bio h1 em { color: var(--tomato); }
-  .bio p { font-size: clamp(17px, 1.35vw, 19px); line-height: 1.6; margin: 0 0 1.1em; max-width: 58ch; }
-  .bio .pull { font-family: var(--display); font-variation-settings: var(--display-vars); font-size: clamp(24px, 2.4vw, 32px); line-height: 1.2; border-left: 3px solid var(--tomato); padding-left: 16px; margin: 32px 0; }
-
-  .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(32px, 5vw, 80px); margin-top: clamp(64px, 10vw, 120px); }
-  .two h2 { font-size: clamp(30px, 3.4vw, 46px); margin: 0 0 18px; }
-  .timeline { list-style: none; margin: 0; padding: 0; }
-  .timeline li { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 16px; padding: 16px 0; border-top: 1.5px solid color-mix(in srgb, var(--ink) 20%, transparent); }
-  .timeline li:last-child { border-bottom: 1.5px solid color-mix(in srgb, var(--ink) 20%, transparent); }
-  .timeline .yr { font-variant-numeric: tabular-nums; color: var(--ink-soft); font-size: 14px; padding-top: 2px; }
-  .timeline b { display: block; font-weight: 600; }
-  .timeline span { color: var(--ink-soft); font-size: 15px; }
-  .skills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
-  .skills span { padding: 7px 14px; border-radius: 999px; border: 1.5px solid var(--ink); font-size: 14px; }
-  .skills span:nth-child(3n+1) { background: var(--butter); }
-  .skills span:nth-child(4n+2) { background: var(--sky); }
-  .skills span:nth-child(5n+3) { background: var(--blush); }
-
-  @media (max-width: 860px) {
-    .a-grid, .two { grid-template-columns: 1fr; }
-    .collage { max-width: 520px; width: 100%; margin: 0 auto; }
-    .timeline li { grid-template-columns: 84px minmax(0, 1fr); }
-  }
-</style>
+<meta name="theme-color" content="#F5F0E6">
+<link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body data-page="about">
-<main class="page">
-  <div class="a-wrap">
-    <div class="a-grid">
-      <div class="collage reveal" aria-label="Collage of photos of Sejal (placeholders)">
-        <div class="ph c1"><svg class="ph-art drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-mirror"/></svg><span class="ph-note">Portrait</span></div>
-        <div class="ph c2"><svg class="ph-art drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-sketchbook"/></svg><span class="ph-note">At work</span></div>
-        <div class="ph c3"><svg class="ph-art drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-photos"/></svg><span class="ph-note">A place you love</span></div>
-        <div class="ph c4"><svg class="ph-art drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-lantana"/></svg><span class="ph-note">Candid</span></div>
-        <svg class="drawing d1" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-pencil"/></svg>
-        <svg class="drawing d2" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-lantana"/></svg>
-        <svg class="piece" viewBox="0 0 100 100" aria-hidden="true"><use href="#d-piece"/></svg>
-        <span class="tape t1"></span><span class="tape t2"></span>
-      </div>
+<div class="page">
+  <header class="page-head">
+    <p class="kicker">About</p>
+    <h1 class="display h1" style="margin-top:22px"><span class="gothic">yo,</span> I’m Sejal.</h1>
+    <p class="lead">I’m a marketing designer and brand strategist in Mumbai. I trained in visual communication at UID Gandhinagar and started working in my second year of college. Since then I’ve designed for studios, a fast-growing SaaS company and D2C brands, and found that the best design work starts with the reader, not the logo.</p>
+  </header>
 
-      <div class="bio">
-        <p class="label" style="color:var(--tomato);margin:0">About</p>
-        <h1 class="display">Hi, I&rsquo;m <em>Sejal</em>.</h1>
-        <p>I&rsquo;m a marketing designer and brand strategist based in Mumbai. I trained in visual communication at UID Gandhinagar, and started working in my second year of college. Since then I&rsquo;ve designed for studios, a fast-growing SaaS company and D2C brands.</p>
-        <p>Most of my work sits where design meets marketing: blogs, product pages, reports and campaigns that need to be understood quickly and remembered for longer. I start with the reader, what they already know, what they need, and what would make them trust a brand, and design back from there.</p>
-        <p class="pull">Good design is a kind of empathy: it does the hard work so the reader doesn&rsquo;t have to.</p>
-        <p>Away from the screen I do jigsaw puzzles, the bigger and more frustrating the better, which probably explains the little pieces scattered around this site. [Add one or two more things about you.]</p>
-      </div>
-    </div>
-
-    <div class="two">
-      <section class="reveal">
-        <h2 class="display">Where I&rsquo;ve been</h2>
-        <ol class="timeline">
-          <li><span class="yr">2026 &ndash; now</span><div><b>Brand strategist, freelance</b><span>D2C textile brand &middot; strategy, product content and SEO</span></div></li>
-          <li><span class="yr">2023 &ndash; now</span><div><b>Marketing designer</b><span>Global spend-management SaaS &middot; joined as an intern, full time since 2024</span></div></li>
-          <li><span class="yr">2024</span><div><b>Visual designer</b><span>Spread Design, Bengaluru &middot; TEDx, MAHE, GOx</span></div></li>
-          <li><span class="yr">2023</span><div><b>Graphic designer</b><span>Design Brewery, Delhi &middot; G20, packaging, branding</span></div></li>
-          <li><span class="yr">2024</span><div><b>B.Des, Visual Communication</b><span>UID Gandhinagar &middot; First Class with Distinction</span></div></li>
-        </ol>
-      </section>
-      <section class="reveal">
-        <h2 class="display">What I&rsquo;m good at</h2>
-        <div class="skills">
-          <span>Brand strategy</span><span>Content design</span><span>Design systems</span><span>Editorial and blog design</span>
-          <span>Information design</span><span>Packaging</span><span>SEO-led design</span><span>Product page design</span>
-          <span>Campaigns</span><span>Research</span>
-        </div>
-        <h2 class="display" style="font-size:clamp(24px,2.4vw,32px)">Recognition</h2>
-        <p style="margin:0;max-width:52ch">[Award name], 2024 and [award name], 2025, for my work on the marketing team. [Confirm names.]</p>
-      </section>
-    </div>
+  <div class="wrap about-grid">
+    <figure class="reveal"><div class="ph"><div class="art a1" style="position:absolute;inset:0"></div><span class="ph-note">Photo</span></div><figcaption><b>i.</b> Me</figcaption></figure>
+    <figure class="reveal"><div class="ph"><div class="art a8" style="position:absolute;inset:0"></div><span class="ph-note">Photo</span></div><figcaption><b>ii.</b> Design friends</figcaption></figure>
+    <figure class="reveal"><div class="ph"><div class="art a5" style="position:absolute;inset:0"></div><span class="ph-note">Photo</span></div><figcaption><b>iii.</b> A thousand-piece puzzle</figcaption></figure>
+    <figure class="reveal"><div class="ph"><div class="art a6" style="position:absolute;inset:0"></div><span class="ph-note">Photo</span></div><figcaption><b>iv.</b> Sunflowers</figcaption></figure>
   </div>
-</main>
 
-<script src="assets/js/drawings.js"></script>
-<script src="assets/js/site.js"></script>
+  <section class="section wrap two-col">
+    <div>
+      <h2 class="h3">Where I’ve <span class="gothic pink">been</span></h2>
+    </div>
+    <ul class="places">
+      <li><span class="yr">2023 – now</span><div><b>Sage Expense Management (formerly Fyle)</b><span>Designer embedded in the marketing team · in-house</span></div></li>
+      <li><span class="yr">2026 – now</span><div><b>D2C home linen brand</b><span>Brand and search strategy · freelance, alongside</span></div></li>
+      <li><span class="yr">2024</span><div><b>Spread Design, Bengaluru</b><span>Visual designer · TEDx, MAHE, GOx</span></div></li>
+      <li><span class="yr">2023</span><div><b>Design Brewery, Delhi</b><span>Graphic designer · G20, packaging, branding</span></div></li>
+      <li><span class="yr">2022</span><div><b>Vizury</b><span>Design intern</span></div></li>
+      <li><span class="yr">2024</span><div><b>UID Gandhinagar</b><span>B.Des, Visual Communication · First Class with Distinction</span></div></li>
+    </ul>
+  </section>
+
+  <section class="section wrap two-col" style="padding-top:0">
+    <div><h2 class="h3">How I <span class="gothic pink">work</span></h2></div>
+    <div>
+      <p class="lead" style="margin-top:0">I start by asking who’s on the other side of the screen and what they need to believe. Then I design the system, not the one-off, and I measure whether it worked.</p>
+      <p class="muted">Away from work: jigsaw puzzles, the bigger the better, which explains the pieces scattered around this site. [Add one or two more things about you.]</p>
+    </div>
+  </section>
+
+  <section class="section wrap contact" id="contact">
+    <h2 class="display h2">Got a brand that needs to be <span class="gothic">understood?</span></h2>
+    <a class="big-cta" href="mailto:jsejaldesigns@gmail.com" data-cursor="Write">Say yo <span aria-hidden="true">→</span></a>
+  </section>
+</div>
+
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/js/site.js" defer></script>
 </body>
 </html>

@@ -4,144 +4,183 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Sejal Jain — Marketing Designer &amp; Brand Strategist</title>
-<meta name="description" content="Sejal Jain is a Mumbai-based marketing designer and brand strategist who makes brands easier to understand and harder to forget.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Hanken+Grotesk:wght@400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400..700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css">
-<style>
-  .stage {
-    position: relative;
-    min-height: max(100svh, 680px);
-    padding: 96px var(--gutter-r) 80px var(--gutter-l);
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-  }
-  .intro { position: relative; z-index: 2; max-width: 720px; text-align: center; }
-  .intro .label { color: var(--tomato); margin: 0 0 22px; }
-  .intro h1 { font-size: clamp(42px, 6.4vw, 92px); margin: 0 0 26px; }
-  .intro p.lede { max-width: 520px; margin: 0 auto; font-size: clamp(16px, 1.4vw, 18px); color: var(--ink-soft); }
-
-  .obj {
-    position: absolute;
-    left: var(--x); top: var(--y);
-    width: calc(clamp(96px, 11.5vw, 176px) * var(--s, 1));
-    aspect-ratio: 1;
-    translate: -50% -50%;
-    rotate: var(--r, 0deg);
-    text-decoration: none;
-    z-index: 3;
-  }
-  .obj .float { display: block; width: 100%; height: 100%; animation: bob 6s ease-in-out infinite; animation-delay: var(--d, 0s); }
-  .obj .drawing { transition: transform .5s var(--spring); }
-  .obj:hover .drawing, .obj:focus-visible .drawing { transform: scale(1.08); animation: wiggle .6s var(--ease); }
-  .obj .obj-label {
-    position: absolute; left: 50%; top: 100%;
-    translate: -50% 6px;
-    white-space: nowrap;
-    font-size: clamp(20px, 1.7vw, 26px);
-    font-style: italic;
-    opacity: 0; transform: translateY(-6px);
-    transition: opacity .3s var(--ease), transform .4s var(--spring);
-    pointer-events: none;
-  }
-  .obj .obj-label::after { content: " \2192"; font-style: normal; color: var(--tomato); }
-  .obj:hover .obj-label, .obj:focus-visible .obj-label { opacity: 1; transform: none; }
-  .obj.deco { z-index: 1; pointer-events: none; }
-  @keyframes bob { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-8px) rotate(1.5deg); } }
-
-  .edge {
-    position: absolute; top: 50%;
-    writing-mode: vertical-rl;
-    font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 600;
-    border-left: 1.5px solid var(--ink); padding-left: 8px;
-    z-index: 2;
-  }
-  .edge--l { left: var(--gutter-l); transform: translateY(-50%) rotate(180deg); border-left: 0; border-right: 1.5px solid var(--ink); padding: 0 8px 0 0; }
-  .edge--r { right: var(--gutter-r); transform: translateY(-50%); }
-
-  .scroll-hint { position: absolute; bottom: 74px; left: 50%; translate: -50% 0; z-index: 2; color: var(--ink-soft); }
-
-  @media (max-width: 760px) {
-    .stage { display: block; padding-top: 110px; }
-    .intro { text-align: left; }
-    .intro p.lede { margin: 0; }
-    .edge, .scroll-hint, .obj.deco { display: none; }
-    .objects { display: grid; grid-template-columns: 1fr 1fr; gap: 44px 16px; margin-top: 48px; }
-    .obj { position: relative; left: auto; top: auto; translate: none; width: 100%; max-width: 150px; justify-self: center; }
-    .obj .obj-label { opacity: 1; transform: none; font-size: 20px; }
-  }
-</style>
+<meta name="description" content="Sejal Jain is a Mumbai-based marketing designer and brand strategist who makes brands easier to understand, easier to find and harder to forget.">
+<meta name="theme-color" content="#121011">
+<meta property="og:title" content="Sejal Jain — Marketing Designer & Brand Strategist">
+<meta property="og:description" content="Brand strategy, design systems and content that does its job.">
+<link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/fonts/GrenzeGotisch.woff" as="font" type="font/woff" crossorigin>
+<link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body data-page="home">
-<main class="page">
-  <section class="stage" id="stage">
-    <div class="intro">
-      <p class="label">Marketing Designer &amp; Brand Strategist</p>
-      <h1 class="display">I make brands easier to
-        <span class="scribble u">understand<svg viewBox="0 0 200 20" preserveAspectRatio="none" aria-hidden="true"><path d="M2 12 C40 4 80 16 120 9 S180 6 198 11" stroke="var(--tomato)"/></svg></span>,
-        and harder to
-        <span class="scribble o"><em>forget</em><svg viewBox="0 0 200 80" preserveAspectRatio="none" aria-hidden="true"><path d="M150 8 C90 -2 18 10 8 40 C0 70 90 80 160 70 C210 62 200 18 120 10" stroke="var(--sky)" style="animation-delay:.5s"/></svg></span>.
-      </h1>
-      <p class="lede">I&rsquo;m Sejal Jain. For four years I&rsquo;ve shaped how SaaS and D2C brands look, read and rank, from the design systems people scroll through to the strategy that decides what they say.</p>
-    </div>
 
-    <div class="objects" id="objects">
-      <a class="obj" href="case-studies.html" style="--x:17%;--y:24%;--r:-8deg;--d:0s" data-depth="18">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-sketchbook"/></svg></span>
-        <span class="obj-label display">Case studies</span>
-      </a>
-      <a class="obj" href="work.html" style="--x:81%;--y:22%;--r:6deg;--d:-1.5s" data-depth="26">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-photos"/></svg></span>
-        <span class="obj-label display">Selected work</span>
-      </a>
-      <a class="obj" href="about.html" style="--x:87%;--y:66%;--r:-10deg;--d:-3s" data-depth="14">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-mirror"/></svg></span>
-        <span class="obj-label display">About me</span>
-      </a>
-      <a class="obj" href="#contact" style="--x:14%;--y:72%;--r:7deg;--d:-2s" data-depth="22">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-envelope"/></svg></span>
-        <span class="obj-label display">Say hello</span>
-      </a>
-      <a class="obj" href="resume.pdf" target="_blank" rel="noopener" style="--x:66%;--y:84%;--r:12deg;--s:.82;--d:-4s" data-depth="16">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200" aria-hidden="true"><use href="#d-resume"/></svg></span>
-        <span class="obj-label display">Resume</span>
-      </a>
-      <span class="obj deco" style="--x:36%;--y:86%;--r:-4deg;--s:.78;--d:-1s" data-depth="30" aria-hidden="true">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200"><use href="#d-pencil"/></svg></span>
-      </span>
-      <span class="obj deco" style="--x:62%;--y:13%;--r:10deg;--s:.72;--d:-2.5s" data-depth="10" aria-hidden="true">
-        <span class="float"><svg class="drawing" viewBox="0 0 200 200"><use href="#d-lantana"/></svg></span>
-      </span>
+<!-- Loader and sound gate: first visit in a session only -->
+<div class="loader" role="dialog" aria-modal="true" aria-label="Welcome">
+  <div class="loader-top"><span>Sejal Jain</span><span data-status>Loading 0/100</span></div>
+  <div class="loader-mid">
+    <p class="loader-name"><span class="gothic">yo,</span> I’m Sejal.<br>Marketing designer<br>&amp; brand strategist.</p>
+  </div>
+  <div class="loader-bottom">
+    <div class="loader-enter">
+      <button class="btn btn--pink" type="button" data-enter="sound">Enter with sound <span class="arrow" aria-hidden="true">→</span></button>
+      <button class="btn btn--ghost" type="button" data-enter="quiet">Enter without sound</button>
     </div>
+    <span class="loader-count" aria-hidden="true">00</span>
+  </div>
+  <span class="loader-bar" aria-hidden="true"></span>
+</div>
 
-    <span class="edge edge--l">Mumbai, India</span>
-    <span class="edge edge--r">Portfolio &middot; 2026</span>
+<div class="page">
+
+  <!-- Hero: liquid metallic paint, full screen -->
+  <header class="hero">
+    <div class="hero-fallback" aria-hidden="true"></div>
+    <canvas id="paint" aria-hidden="true"></canvas>
+    <div class="hero-inner">
+      <div class="hero-top"><span>Sejal Jain</span><span>Portfolio · 2026</span></div>
+      <div>
+        <h1 class="hero-title"><span class="yo">yo,</span><span class="name">I’m Sejal Jain.</span></h1>
+        <p class="hero-sub">Marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and harder to forget.</p>
+      </div>
+      <div class="hero-bottom">
+        <span data-clock>Mumbai</span>
+        <span class="scrl" data-scramble>SCRL</span>
+        <span>Brand · Content · Design</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Navigation starts at the bottom of the hero and docks at the top -->
+  <div class="nav-dock is-hero"></div>
+
+  <!-- Intro statement -->
+  <section class="section wrap">
+    <p class="kicker">Hello</p>
+    <p class="statement" data-words style="margin-top:28px">Four years across SaaS and D2C brands. I set the strategy, design the system and check the numbers, so the work looks good <span class="gothic">and</span> does its job.</p>
   </section>
-</main>
 
-<script src="assets/js/drawings.js"></script>
-<script src="assets/js/site.js"></script>
-<script>
-  /* Objects drift gently away from the cursor, each at its own depth */
-  (function () {
-    if (!matchMedia('(pointer: fine)').matches || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    var objs = [].slice.call(document.querySelectorAll('#objects .obj'));
-    var tx = 0, ty = 0, cx = 0, cy = 0;
-    addEventListener('mousemove', function (e) {
-      tx = (e.clientX / innerWidth - 0.5) * 2;
-      ty = (e.clientY / innerHeight - 0.5) * 2;
-    }, { passive: true });
-    (function loop() {
-      cx += (tx - cx) * 0.06; cy += (ty - cy) * 0.06;
-      objs.forEach(function (o) {
-        var d = +o.getAttribute('data-depth') || 15;
-        o.style.transform = 'translate(' + (-cx * d) + 'px,' + (-cy * d) + 'px)';
-      });
-      requestAnimationFrame(loop);
-    })();
-  })();
-</script>
+  <!-- Selected work: one project per screen -->
+  <section class="section wrap dark" id="work" data-theme="dark" style="padding-top:clamp(80px,10vw,140px)">
+    <div class="section-head">
+      <h2 class="display h2">Selected <span class="gothic pink">work</span></h2>
+      <span class="count">03 projects</span>
+    </div>
+
+    <div class="stack">
+      <a class="card" href="case-blog.html" data-cursor="View">
+        <div class="art art-blog" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
+        <span class="ph-note">Mockup coming</span>
+        <div class="card-body">
+          <div>
+            <div class="card-tags"><span class="tag">Design systems</span><span class="tag">Content design</span><span class="tag">CMS components</span><span class="tag">Measurement</span></div>
+            <h3>Rebuilt, not repainted</h3>
+            <p class="client">B2B SaaS, spend management · 2023 to now</p>
+          </div>
+          <div class="card-stat"><b>3</b><span>blog design systems in three years, through two rebrands</span></div>
+        </div>
+      </a>
+
+      <a class="card" href="case-linen.html" data-cursor="View">
+        <div class="art art-linen" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
+        <span class="ph-note">Mockup coming</span>
+        <div class="card-body">
+          <div>
+            <div class="card-tags"><span class="tag">Brand voice</span><span class="tag">Search strategy</span><span class="tag">Product copy</span><span class="tag">Analytics</span></div>
+            <h3>Winning back Google in six months</h3>
+            <p class="client">D2C home linen brand, India · 2026</p>
+          </div>
+          <div class="card-stat"><b>+80%</b><span>clicks from product searches in six months</span></div>
+        </div>
+      </a>
+
+      <div class="card is-soon" aria-label="Lantana, case study coming soon">
+        <div class="art art-lantana" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
+        <div class="card-body">
+          <div>
+            <div class="card-tags"><span class="tag">Concept</span><span class="tag">Campaign</span><span class="tag">Brand</span></div>
+            <h3>An invasive weed, worth bidding on</h3>
+            <p class="client">Passion project · since 2023</p>
+          </div>
+          <div class="card-stat"><b>soon</b><span>Case study in progress</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results, impossible to miss -->
+  <section class="section wrap" style="padding-bottom:0">
+    <p class="kicker" style="margin-bottom:28px">What the work did</p>
+    <div class="stats reveal">
+      <div class="stat"><b>+80%</b><span>clicks from product searches for a D2C brand, in six months</span></div>
+      <div class="stat"><b>Top 3</b><span>on Google for that brand’s core product searches</span></div>
+      <div class="stat"><b>3×</b><span>blog conversion at a SaaS company, even as traffic fell</span></div>
+      <div class="stat"><b>2</b><span>category leaders adopted the blog format I started</span></div>
+    </div>
+    <p class="stats-note">Sources in each case study.</p>
+  </section>
+
+  <!-- Brands -->
+  <section class="section wrap">
+    <div class="section-head">
+      <h2 class="display h2">Brands I’ve <span class="gothic pink">shaped</span></h2>
+      <a class="btn btn--ghost" href="backyard.html">See the backyard <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
+    <div class="brands reveal">
+      <div class="brand"><b>Sage Expense Management</b><span>In-house · 2023 to now</span></div>
+      <div class="brand gothic-b"><b>G20</b><span>Reports and collateral · 2023</span></div>
+      <div class="brand"><b>TEDx</b><span>Event identity · 2024</span></div>
+      <div class="brand"><b>MAHE Bengaluru</b><span>Identity system · 2024</span></div>
+      <div class="brand"><b>GOx</b><span>Brand work · 2024</span></div>
+      <div class="brand gothic-b"><b>Ledure</b><span>Lighting packaging · 2023</span></div>
+      <div class="brand"><b>Manohar International Airport</b><span>Brand extensions</span></div>
+      <div class="brand"><b>Oxford Bookstore</b><span>Centenary campaign</span></div>
+    </div>
+  </section>
+
+  <!-- Skills -->
+  <section class="section wrap" style="padding-top:0">
+    <div class="section-head">
+      <h2 class="display h2">What I’m <span class="gothic pink">good</span> at</h2>
+      <span class="count">06 skills</span>
+    </div>
+    <div class="skills">
+      <article class="skill reveal"><span class="n">i.</span><div><h3>Brand strategy and positioning</h3><p>Finding what a brand stands for, who it’s for, and the words that say it.</p></div></article>
+      <article class="skill reveal"><span class="n">ii.</span><div><h3>Design systems</h3><p>Systems that survive rebrands, scale across teams and stay recognisable.</p></div></article>
+      <article class="skill reveal"><span class="n">iii.</span><div><h3>Content design</h3><p>Long, dense ideas turned into visuals and pages people actually finish.</p></div></article>
+      <article class="skill reveal"><span class="n">iv.</span><div><h3>Search and AI visibility</h3><p>Pages built to rank on Google and show up in ChatGPT and AI Overviews.</p></div></article>
+      <article class="skill reveal"><span class="n">v.</span><div><h3>Campaigns and launches</h3><p>Reports, events and go-to-market material that sales and partners use.</p></div></article>
+      <article class="skill reveal"><span class="n">vi.</span><div><h3>Measurement</h3><p>Clean data and dashboards, so creative decisions rest on evidence.</p></div></article>
+    </div>
+  </section>
+
+  <!-- About teaser: the puzzle breaks apart to uncover one line -->
+  <section class="puzzle" aria-label="About">
+    <div class="puzzle-stage">
+      <div class="puzzle-line">
+        <p>Every brand is a <span class="gothic">puzzle.</span> I find the piece that’s missing.</p>
+        <a class="btn" href="about.html">More about me <span class="arrow" aria-hidden="true">→</span></a>
+      </div>
+      <div class="pieces" aria-hidden="true"></div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section class="section wrap contact" id="contact">
+    <p class="kicker" style="justify-content:center;margin-bottom:28px">Contact</p>
+    <h2 class="display h2">Got a brand that needs to be <span class="gothic">understood?</span></h2>
+    <a class="big-cta" href="mailto:jsejaldesigns@gmail.com" data-cursor="Write">Say yo <span aria-hidden="true">→</span></a>
+    <div class="contact-links">
+      <button class="btn btn--ghost copy-mail" type="button" data-copy-email>Copy email</button>
+      <a class="btn btn--ghost" href="https://www.linkedin.com/in/jain-sejal" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn btn--ghost" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+    </div>
+  </section>
+</div>
+
+<script src="assets/js/hero.js"></script>
+<script src="assets/vendor/gsap.min.js" defer></script>
+<script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/js/site.js" defer></script>
+<script src="assets/js/home.js" defer></script>
 </body>
 </html>

@@ -5,154 +5,62 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Missing piece — Sejal Jain</title>
 <meta name="robots" content="noindex">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..800&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Fraunces:ital,opsz,wght,SOFT,WONK@0,9..144,300..800,0..100,0..1;1,9..144,300..800,0..100,0..1&family=Hanken+Grotesk:wght@400..700&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400..700&display=swap">
-<link rel="stylesheet" href="assets/css/site.css">
-<style>
-  html, body { height: 100%; overflow: hidden; }
-  #pile { position: fixed; inset: 0; width: 100%; height: 100%; touch-action: none; }
-  .lost {
-    position: fixed; left: 50%; top: 38%; translate: -50% -50%;
-    text-align: center; z-index: 2; pointer-events: none; width: min(92vw, 720px);
-  }
-  .lost .label { color: var(--tomato); margin: 0 auto 14px; max-width: none; }
-  .lost h1 { font-size: clamp(44px, 7vw, 100px); margin: 0 0 18px; }
-  .lost h1 em { color: var(--tomato); }
-  .lost p { margin: 0 auto 26px; max-width: 40ch; color: var(--ink-soft); }
-  .lost a { pointer-events: auto; display: inline-flex; gap: 10px; padding: 12px 22px; border-radius: 999px; background: var(--ink); color: var(--paper); text-decoration: none; font-weight: 600; font-size: 14px; transition: transform .4s var(--spring), background .2s; }
-  .lost a:hover { transform: translateY(-3px) rotate(-1.5deg); background: var(--tomato); }
-</style>
+<meta name="theme-color" content="#121011">
+<link rel="stylesheet" href="assets/css/main.css">
+<style>html,body{overflow:hidden}</style>
 </head>
 <body data-page="404" data-footer="off">
-<canvas id="pile" aria-hidden="true"></canvas>
 <main class="page lost">
-    <p class="label">Error 404</p>
-    <h1 class="display">This page is the <em>missing piece</em>.</h1>
-    <p>It may have moved, or never existed. Push the pieces around for a bit, then head home.</p>
-    <a href="index.html">Back to the homepage <span aria-hidden="true">&rarr;</span></a>
+  <canvas id="pile" aria-hidden="true"></canvas>
+  <div class="lost-text">
+    <p class="kicker" style="justify-content:center">Error 404</p>
+    <h1 class="display h2">This page is the <span class="gothic">missing piece.</span></h1>
+    <p class="muted" style="color:rgba(245,240,230,.7)">Push the pieces around for a bit, then head home.</p>
+    <a class="btn btn--pink" href="index.html">Back home <span class="arrow" aria-hidden="true">→</span></a>
+  </div>
 </main>
-
-<script src="assets/js/drawings.js"></script>
-<script src="assets/js/site.js"></script>
+<script src="assets/js/site.js" defer></script>
 <script>
-/* A small hand-written physics pile: puzzle pieces (treated as circles for collisions)
-   fall, bounce, stack, and get pushed or flung by the pointer. */
-(function () {
-  var canvas = document.getElementById('pile'), ctx = canvas.getContext('2d');
-  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var path = new Path2D(PIECE);              // 100 x 100 unit puzzle piece from drawings.js
-  var css = getComputedStyle(document.documentElement);
-  var COLORS = ['--tomato', '--sky', '--butter', '--pink', '--forest', '--blush'].map(function (v) { return css.getPropertyValue(v).trim() || '#e4472a'; });
-  var INK = css.getPropertyValue('--ink').trim() || '#2b1b14';
-  var W, H, dpr, bodies = [], mouse = { x: -999, y: -999, vx: 0, vy: 0, down: false, grab: null };
-
-  function resize() {
-    dpr = Math.min(devicePixelRatio || 1, 2);
-    W = innerWidth; H = innerHeight;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  }
-  resize(); addEventListener('resize', resize);
-
-  var count = Math.round(Math.min(46, Math.max(18, W * H / 26000)));
-  for (var i = 0; i < count; i++) {
-    var r = (W < 600 ? 22 : 30) + Math.random() * (W < 600 ? 14 : 22);
-    bodies.push({
-      x: r + Math.random() * (W - 2 * r),
-      y: reduced ? H - r - Math.random() * H * 0.3 : -Math.random() * H * 1.4 - r,
-      vx: (Math.random() - .5) * 2, vy: 0,
-      a: Math.random() * Math.PI * 2, va: (Math.random() - .5) * .1,
-      r: r, c: COLORS[i % COLORS.length]
-    });
-  }
-
-  var G = 0.42, BOUNCE = 0.35, FRICTION = 0.992;
+/* Hand-written physics: puzzle pieces fall, stack and get flung by the pointer */
+addEventListener('DOMContentLoaded', function () {
+  var cv = document.getElementById('pile'), cx = cv.getContext('2d');
+  var PIECE = new Path2D('M20 30H40C38 16 62 16 60 30H80V50C94 48 94 72 80 70V90H60C62 78 38 78 40 90H20V70C32 72 32 48 20 50Z');
+  var cols = ['#FF0592', '#F5F0E6', '#FF0592', '#ECE5D8', '#FFD3EA'], W, H, B = [], m = { x: -999, y: -999, vx: 0, vy: 0, grab: null }, lx = 0, ly = 0;
+  function size() { var d = Math.min(devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cv.width = W * d; cv.height = H * d; cx.setTransform(d, 0, 0, d, 0, 0); }
+  size(); addEventListener('resize', size);
+  var n = Math.round(Math.min(44, Math.max(16, W * H / 28000)));
+  for (var i = 0; i < n; i++) { var r = (W < 600 ? 22 : 30) + Math.random() * 20; B.push({ x: r + Math.random() * (W - 2 * r), y: -Math.random() * H * 1.4 - r, vx: (Math.random() - .5) * 2, vy: 0, a: Math.random() * 6.3, va: 0, r: r, c: cols[i % cols.length] }); }
   function step() {
-    var k, b, o;
-    for (k = 0; k < bodies.length; k++) {
-      b = bodies[k];
-      if (b === mouse.grab) {
-        b.vx = (mouse.x - b.x) * 0.35; b.vy = (mouse.y - b.y) * 0.35;
-      } else {
-        b.vy += G;
-      }
-      b.vx *= FRICTION; b.vy *= FRICTION;
-      b.x += b.vx; b.y += b.vy;
-      b.a += b.va; b.va *= 0.98;
-      if (b.y > H - b.r) { b.y = H - b.r; b.vy *= -BOUNCE; b.vx *= 0.9; b.va += b.vx * 0.002; }
-      if (b.x < b.r) { b.x = b.r; b.vx *= -BOUNCE; }
-      if (b.x > W - b.r) { b.x = W - b.r; b.vx *= -BOUNCE; }
-      if (b !== mouse.grab) {
-        var dx = b.x - mouse.x, dy = b.y - mouse.y, d = Math.hypot(dx, dy), reach = b.r + 40;
-        if (d < reach && d > 0) {
-          var push = (reach - d) / reach;
-          b.vx += dx / d * push * 2.2 + mouse.vx * 0.06 * push;
-          b.vy += dy / d * push * 2.2 + mouse.vy * 0.06 * push;
-          b.va += (mouse.vx * dy - mouse.vy * dx) * 0.00002;
-        }
-      }
-    }
-    for (var it = 0; it < 3; it++) {
-      for (k = 0; k < bodies.length; k++) {
-        b = bodies[k];
-        for (var j = k + 1; j < bodies.length; j++) {
-          o = bodies[j];
-          var ddx = o.x - b.x, ddy = o.y - b.y, min = (b.r + o.r) * 0.86;
-          var dd = ddx * ddx + ddy * ddy;
-          if (dd >= min * min || dd === 0) continue;
-          var dist = Math.sqrt(dd), nx = ddx / dist, ny = ddy / dist, over = (min - dist) / 2;
-          b.x -= nx * over; b.y -= ny * over; o.x += nx * over; o.y += ny * over;
-          var rv = (o.vx - b.vx) * nx + (o.vy - b.vy) * ny;
-          if (rv < 0) {
-            var imp = -(1 + BOUNCE) * rv / 2;
-            b.vx -= imp * nx; b.vy -= imp * ny; o.vx += imp * nx; o.vy += imp * ny;
-            var tang = (o.vx - b.vx) * -ny + (o.vy - b.vy) * nx;
-            b.va += tang * 0.004; o.va -= tang * 0.004;
-          }
-        }
-      }
+    B.forEach(function (b) {
+      if (b === m.grab) { b.vx = (m.x - b.x) * .35; b.vy = (m.y - b.y) * .35; } else b.vy += .42;
+      b.vx *= .992; b.vy *= .992; b.x += b.vx; b.y += b.vy; b.a += b.va; b.va *= .98;
+      if (b.y > H - b.r) { b.y = H - b.r; b.vy *= -.35; b.vx *= .9; b.va += b.vx * .002; }
+      if (b.x < b.r) { b.x = b.r; b.vx *= -.35; } if (b.x > W - b.r) { b.x = W - b.r; b.vx *= -.35; }
+      if (b !== m.grab) { var dx = b.x - m.x, dy = b.y - m.y, d = Math.hypot(dx, dy), R = b.r + 40; if (d < R && d > 0) { var p = (R - d) / R; b.vx += dx / d * p * 2.2 + m.vx * .06 * p; b.vy += dy / d * p * 2.2 + m.vy * .06 * p; } }
+    });
+    for (var k = 0; k < 3; k++) for (var i = 0; i < B.length; i++) for (var j = i + 1; j < B.length; j++) {
+      var a = B[i], o = B[j], dx = o.x - a.x, dy = o.y - a.y, min = (a.r + o.r) * .86, dd = dx * dx + dy * dy;
+      if (dd >= min * min || !dd) continue;
+      var d = Math.sqrt(dd), nx = dx / d, ny = dy / d, ov = (min - d) / 2;
+      a.x -= nx * ov; a.y -= ny * ov; o.x += nx * ov; o.y += ny * ov;
+      var rv = (o.vx - a.vx) * nx + (o.vy - a.vy) * ny;
+      if (rv < 0) { var im = -1.35 * rv / 2; a.vx -= im * nx; a.vy -= im * ny; o.vx += im * nx; o.vy += im * ny; }
     }
   }
-
   function draw() {
-    ctx.clearRect(0, 0, W, H);
-    for (var k = 0; k < bodies.length; k++) {
-      var b = bodies[k], s = b.r * 2 / 74;     // the piece body spans ~74 units of its 100 box
-      ctx.save();
-      ctx.translate(b.x, b.y); ctx.rotate(b.a); ctx.scale(s, s); ctx.translate(-50, -54);
-      ctx.fillStyle = b.c; ctx.fill(path);
-      ctx.lineWidth = 2.2 / s * 1.0; ctx.strokeStyle = INK; ctx.lineJoin = 'round'; ctx.stroke(path);
-      ctx.restore();
-    }
+    cx.clearRect(0, 0, W, H);
+    B.forEach(function (b) { var s = b.r * 2 / 74; cx.save(); cx.translate(b.x, b.y); cx.rotate(b.a); cx.scale(s, s); cx.translate(-50, -54); cx.fillStyle = b.c; cx.fill(PIECE); cx.restore(); });
   }
-
-  var lastX = 0, lastY = 0;
-  function pt(e) { return { x: e.clientX, y: e.clientY }; }
-  canvas.addEventListener('pointermove', function (e) {
-    var p = pt(e); mouse.vx = p.x - lastX; mouse.vy = p.y - lastY; lastX = mouse.x = p.x; lastY = mouse.y = p.y;
+  cv.addEventListener('pointermove', function (e) { m.vx = e.clientX - lx; m.vy = e.clientY - ly; lx = m.x = e.clientX; ly = m.y = e.clientY; });
+  cv.addEventListener('pointerdown', function (e) {
+    m.x = e.clientX; m.y = e.clientY;
+    var best = null, bd = 1e9; B.forEach(function (b) { var d = Math.hypot(b.x - m.x, b.y - m.y); if (d < b.r && d < bd) { bd = d; best = b; } });
+    m.grab = best; cv.setPointerCapture(e.pointerId);
   });
-  canvas.addEventListener('pointerdown', function (e) {
-    var p = pt(e); lastX = mouse.x = p.x; lastY = mouse.y = p.y;
-    var best = null, bd = 1e9;
-    bodies.forEach(function (b) { var d = Math.hypot(b.x - p.x, b.y - p.y); if (d < b.r && d < bd) { bd = d; best = b; } });
-    mouse.grab = best;
-    if (best && window.SJSound) window.SJSound.snap();
-    canvas.setPointerCapture(e.pointerId);
-  });
-  function release() { mouse.grab = null; }
-  canvas.addEventListener('pointerup', release);
-  canvas.addEventListener('pointercancel', release);
-  canvas.addEventListener('pointerleave', function () { if (!mouse.grab) { mouse.x = mouse.y = -999; } });
-
-  (function loop() {
-    if (!reduced) step();
-    else if (!loop.settled) { for (var n = 0; n < 400; n++) step(); loop.settled = true; }
-    mouse.vx *= 0.8; mouse.vy *= 0.8;
-    draw();
-    requestAnimationFrame(loop);
-  })();
-})();
+  cv.addEventListener('pointerup', function () { m.grab = null; });
+  cv.addEventListener('pointerleave', function () { if (!m.grab) m.x = m.y = -999; });
+  (function loop() { step(); m.vx *= .8; m.vy *= .8; draw(); requestAnimationFrame(loop); })();
+});
 </script>
 </body>
 </html>
