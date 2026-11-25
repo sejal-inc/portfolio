@@ -1,16 +1,17 @@
-/* Shared behaviour for every page: navigation, menu, cursor, loader + sound
-   gate, sound, footer reveal, section colour changes, reveals, scramble text.
-   No build step: plain JavaScript plus GSAP (free) for scroll animation. */
+/* Shared behaviour for every page: split pill navigation, mobile menu,
+   cursor, loader and welcome, sound, footer reveal, slow anchor scrolling,
+   reveals. Plain JavaScript plus GSAP (free) for scroll work. */
 (function () {
   'use strict';
 
   var EMAIL = 'jsejaldesigns@gmail.com';
   var LINKEDIN = 'https://www.linkedin.com/in/jain-sejal';
-  var RESUME = 'resume.pdf'; // replace with the latest PDF before launch
+  var INSTAGRAM = 'https://www.instagram.com/jsejal_';
 
   var root = document.documentElement;
   var body = document.body;
   var page = body.getAttribute('data-page') || '';
+  var isHome = page === 'home';
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
   var store = {
@@ -20,11 +21,12 @@
     sset: function (k, v) { try { sessionStorage.setItem('sj.' + k, v); } catch (e) {} }
   };
   var PIECE = 'M20 30H40C38 16 62 16 60 30H80V50C94 48 94 72 80 70V90H60C62 78 38 78 40 90H20V70C32 72 32 48 20 50Z';
-  window.SJ = Object.assign(window.SJ || {}, { PIECE: PIECE, reduced: reduced, fine: fine });
+  var PIECE_SVG = '<svg viewBox="10 10 90 90" aria-hidden="true"><path d="' + PIECE + '" fill="currentColor"/></svg>';
+  window.SJ = Object.assign(window.SJ || {}, { PIECE: PIECE, PIECE_SVG: PIECE_SVG, reduced: reduced, fine: fine });
 
   /* ------------------------------------------------------------------ Sound
-     A soft generative pad (never loops audibly) and tiny interface sounds,
-     all made in the browser with Web Audio: no audio files to download. */
+     A soft generative pad and tiny interface ticks, made in the browser:
+     no audio files to download. */
   var Sound = {
     on: false, ctx: null, master: null, padTimer: null,
     init: function () {
@@ -34,7 +36,6 @@
       this.master = c.createGain(); this.master.gain.value = 0;
       var comp = c.createDynamicsCompressor(); comp.threshold.value = -24;
       this.master.connect(comp).connect(c.destination);
-      // shimmer delay shared by the pad
       var d = c.createDelay(1.5); d.delayTime.value = .42;
       var fb = c.createGain(); fb.gain.value = .35;
       var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
@@ -88,84 +89,63 @@
   };
   window.SJ.sound = Sound;
 
-  /* ------------------------------------------------------------------ Chrome */
-  var NAV = [
-    { href: 'index.html#work', label: 'Work', key: 'work' },
+  /* ------------------------------------------------------------------ Navigation */
+  var contactHref = document.getElementById('contact') ? '#contact' : 'index.html#contact';
+  var LINKS = [
+    { href: 'index.html', label: 'Home', key: 'home' },
+    { href: 'work.html', label: 'Selected work', key: 'work' },
     { href: 'backyard.html', label: 'Backyard', key: 'backyard' },
     { href: 'about.html', label: 'About', key: 'about' },
-    { href: '#contact', label: 'Contact', key: 'contact' }
+    { href: contactHref, label: 'Contact', key: 'contact' }
   ];
+  function link(n) { return '<a class="pill nav-link" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }
 
   function buildNav() {
-    var dock = document.querySelector('.nav-dock');
-    if (!dock) { dock = document.createElement('div'); dock.className = 'nav-dock is-top'; body.insertBefore(dock, body.firstChild); }
-    dock.innerHTML =
-      '<nav class="nav" aria-label="Main">' +
-        '<a class="mark" href="index.html" aria-label="Sejal Jain, home" data-cursor-link>sj</a>' +
-        NAV.map(function (n) { return '<a class="nav-link" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }).join('') +
-        '<button class="icon-btn" type="button" data-sound aria-pressed="false" aria-label="Turn sound on"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span></button>' +
-        '<button class="face" type="button" aria-label="Open menu" aria-expanded="false" data-menu-open>' +
-          '<svg viewBox="0 0 30 30" aria-hidden="true">' +
-            '<path class="ear" d="M5 12 L8 3 L12 10 Z" fill="currentColor"/><path class="ear" d="M25 12 L22 3 L18 10 Z" fill="currentColor"/>' +
-            '<circle class="dot d1" cx="8" cy="16" r="2.4" fill="currentColor"/><circle class="dot d2" cx="15" cy="16" r="2.4" fill="currentColor"/><circle class="dot d3" cx="22" cy="16" r="2.4" fill="currentColor"/>' +
-            '<path class="mouth" d="M11 21 Q15 25 19 21" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
-          '</svg></button>' +
-      '</nav>';
+    var n = document.createElement('nav');
+    n.className = 'nav' + (isHome && scrollY < innerHeight * .4 ? ' at-bottom' : '');
+    n.setAttribute('aria-label', 'Main');
+    n.innerHTML =
+      '<div><a class="pill mono" href="index.html" aria-label="Sejal Jain, home">sj</a>' + LINKS.slice(0, 2).map(link).join('') + '</div>' +
+      '<div>' + LINKS.slice(2).map(link).join('') +
+        '<button class="pill round" type="button" data-sound aria-pressed="false" aria-label="Turn sound on"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span></button>' +
+        '<button class="pill menu-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu">Menu</button>' +
+      '</div>';
+    body.insertBefore(n, body.firstChild);
+    if (!isHome) return;
+    // On the homepage the pills wait at the bottom of the hero, then rise to the top
+    var ticking = false;
+    function check() { ticking = false; n.classList.toggle('at-bottom', scrollY < innerHeight * .4); }
+    addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } }, { passive: true });
   }
 
   function buildMenu() {
     var m = document.createElement('div');
     m.className = 'menu'; m.id = 'menu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'Menu');
     m.innerHTML =
-      '<canvas aria-hidden="true"></canvas>' +
-      '<div class="menu-top"><a class="gothic" href="index.html" style="font-size:34px;text-decoration:none">sj</a><button class="menu-close" type="button" data-menu-close>Close</button></div>' +
-      '<ul>' + [['index.html', 'Home', 'home'], ['index.html#work', 'Work', 'work'], ['backyard.html', 'Backyard', 'backyard'], ['about.html', 'About', 'about'], ['#contact', 'Contact', 'contact']].map(function (l, i) {
-        return '<li><a href="' + l[0] + '"' + (l[2] === page ? ' aria-current="page"' : '') + '><small>0' + (i + 1) + '</small>' + l[1] + '</a></li>';
-      }).join('') + '</ul>' +
-      '<div class="menu-foot"><span>' + EMAIL + '</span><span><a href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a></span><span>Mumbai, India</span></div>';
+      '<div class="menu-top"><a class="pill mono" href="index.html" aria-label="Home">sj</a><button class="pill" type="button" data-menu-close>Close</button></div>' +
+      '<ul>' + LINKS.map(function (l) { return '<li><a href="' + l.href + '"' + (l.key === page ? ' aria-current="page"' : '') + '>' + l.label + '</a></li>'; }).join('') + '</ul>' +
+      '<div class="menu-foot"><a href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram ↗</a><a href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a href="mailto:' + EMAIL + '">Email ↗</a></div>';
     body.appendChild(m);
-
     var openBtn = document.querySelector('[data-menu-open]');
-    function open() { m.classList.add('is-open'); openBtn.setAttribute('aria-expanded', 'true'); openBtn.classList.add('is-face'); body.style.overflow = 'hidden'; Sound.tick(true); trail.start(); setTimeout(function () { m.querySelector('[data-menu-close]').focus(); }, 300); }
-    function close() { m.classList.remove('is-open'); openBtn.setAttribute('aria-expanded', 'false'); openBtn.classList.remove('is-face'); body.style.overflow = ''; trail.stop(); openBtn.focus(); }
+    function open() { m.classList.add('is-open'); openBtn.setAttribute('aria-expanded', 'true'); body.style.overflow = 'hidden'; Sound.tick(true); setTimeout(function () { m.querySelector('[data-menu-close]').focus(); }, 300); }
+    function close() { m.classList.remove('is-open'); openBtn.setAttribute('aria-expanded', 'false'); body.style.overflow = ''; }
     openBtn.addEventListener('click', open);
-    m.querySelector('[data-menu-close]').addEventListener('click', close);
+    m.querySelector('[data-menu-close]').addEventListener('click', function () { close(); openBtn.focus(); });
     m.addEventListener('click', function (e) { if (e.target.closest('a')) close(); });
-    addEventListener('keydown', function (e) { if (e.key === 'Escape' && m.classList.contains('is-open')) close(); });
-
-    // Colour trail that follows the pointer while the menu is open
-    var cv = m.querySelector('canvas'), cx = cv.getContext('2d'), pts = [], raf = 0;
-    var trail = {
-      start: function () { if (reduced) return; resize(); raf = requestAnimationFrame(draw); },
-      stop: function () { cancelAnimationFrame(raf); pts = []; cx.clearRect(0, 0, cv.width, cv.height); }
-    };
-    function resize() { var d = Math.min(devicePixelRatio || 1, 2); cv.width = innerWidth * d; cv.height = innerHeight * d; cx.setTransform(d, 0, 0, d, 0, 0); }
-    m.addEventListener('pointermove', function (e) { pts.push({ x: e.clientX, y: e.clientY, life: 1 }); if (pts.length > 60) pts.shift(); });
-    function draw() {
-      cx.clearRect(0, 0, innerWidth, innerHeight);
-      cx.lineCap = 'round'; cx.lineJoin = 'round';
-      for (var i = 1; i < pts.length; i++) {
-        var a = pts[i - 1], b = pts[i]; b.life -= .018;
-        cx.strokeStyle = i % 2 ? 'rgba(255,5,146,' + Math.max(b.life, 0) * .9 + ')' : 'rgba(245,240,230,' + Math.max(b.life, 0) * .35 + ')';
-        cx.lineWidth = 34 * Math.max(b.life, 0);
-        cx.beginPath(); cx.moveTo(a.x, a.y); cx.lineTo(b.x, b.y); cx.stroke();
-      }
-      pts = pts.filter(function (p) { return p.life > 0; });
-      raf = requestAnimationFrame(draw);
-    }
+    addEventListener('keydown', function (e) { if (e.key === 'Escape' && m.classList.contains('is-open')) { close(); openBtn.focus(); } });
   }
 
+  /* ------------------------------------------------------------------ Footer: sharp, centred, revealed from underneath */
   function buildFooter() {
     if (body.getAttribute('data-footer') === 'off') return;
     var f = document.createElement('footer');
     f.className = 'footer';
+    var map = [['index.html', 'Home'], ['work.html', 'Selected work'], ['case-blog.html', 'Rebuilt, not repainted'], ['case-linen.html', 'Winning back Google'], ['backyard.html', 'Backyard'], ['about.html', 'About']];
     f.innerHTML =
-      '<p class="footer-big" aria-label="Sejal Jain">Sejal<span>.</span></p>' +
-      '<div class="footer-row">' +
-        '<div class="footer-links"><a href="mailto:' + EMAIL + '">' + EMAIL + '</a><a href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a href="' + RESUME + '" target="_blank" rel="noopener">Resume ↗</a></div>' +
-        '<span data-clock>Mumbai</span>' +
-        '<span>Marketing Designer &amp; Brand Strategist · © 2026</span>' +
-      '</div>';
+      '<p class="footer-msg">Thanks for staying till the <span class="gothic">end.</span> Now go make something you’re proud of.</p>' +
+      '<nav class="footer-nav" aria-label="Sitemap">' + map.map(function (l) { return '<a class="pill" href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
+      '<div class="footer-social"><a class="pill" href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram ↗</a><a class="pill" href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a class="pill" href="mailto:' + EMAIL + '">Email ↗</a></div>' +
+      '<small>© 2026 Sejal Jain</small>';
     body.appendChild(f);
     var pg = document.querySelector('.page');
     if (!pg) return;
@@ -174,146 +154,234 @@
     size(); addEventListener('resize', size);
   }
 
-  /* ------------------------------------------------------------------ Cursor */
+  /* ------------------------------------------------------------------ Cursor
+     Ring by default (inverts over dark things). Over [data-cursor="work"]:
+     a cream pill with a pink puzzle piece. Over [data-cursor="puzzle"]:
+     a pink puzzle piece. Over .lens numbers: the part under the cursor turns pink. */
   function buildCursor() {
     if (!fine) return;
     var c = document.createElement('div');
     c.className = 'cursor'; c.setAttribute('aria-hidden', 'true');
-    c.innerHTML = '<span class="piece"><svg viewBox="0 0 100 100"><path d="' + PIECE + '" fill="currentColor"/></svg></span><span class="label"></span>';
+    c.innerHTML = '<span class="ring"></span><span class="work">' + PIECE_SVG + '<span class="t">View case study</span></span><span class="piece">' + PIECE_SVG + '</span>';
     body.appendChild(c);
     root.classList.add('has-cursor');
-    var label = c.querySelector('.label'), x = -100, y = -100, cx = x, cy = y;
+    var label = c.querySelector('.t'), x = -200, y = -200, cx = x, cy = y, lenses = [];
     addEventListener('pointermove', function (e) { x = e.clientX; y = e.clientY; }, { passive: true });
     addEventListener('pointerdown', function () { c.classList.add('is-down'); });
     addEventListener('pointerup', function () { c.classList.remove('is-down'); });
     document.addEventListener('pointerover', function (e) {
-      var t = e.target.closest('[data-cursor]'), l = e.target.closest('a, button, [data-cursor-link]');
-      if (t) { label.textContent = t.getAttribute('data-cursor'); c.classList.add('is-label'); }
-      else c.classList.remove('is-label');
-      c.classList.toggle('is-link', !t && !!l);
-      if ((t || l) && !(t || l).contains(e.relatedTarget)) Sound.tick(false);
+      var t = e.target.closest('[data-cursor]'), kind = t && t.getAttribute('data-cursor');
+      var l = e.target.closest('a, button, [role="button"]');
+      c.classList.toggle('is-work', kind === 'work');
+      c.classList.toggle('is-puzzle', kind === 'puzzle');
+      c.classList.toggle('is-lens', !!e.target.closest('.lens'));
+      if (kind === 'work') label.textContent = t.getAttribute('data-cursor-text') || 'View case study';
+      c.classList.toggle('is-link', !kind && !!l);
+      if (l && !l.contains(e.relatedTarget)) Sound.tick(false);
     });
+    document.addEventListener('pointerleave', function () { x = y = -200; });
+
+    // pink lens: wrap each .lens number with a pink copy, clipped to the cursor
+    document.querySelectorAll('.lens').forEach(function (el) {
+      var copy = document.createElement('span'); copy.className = 'lens-copy'; copy.setAttribute('aria-hidden', 'true'); copy.textContent = el.textContent;
+      el.appendChild(copy); lenses.push({ el: el, copy: copy, on: false });
+    });
+    var R = 34;
     (function loop() {
-      cx += (x - cx) * (reduced ? 1 : .22); cy += (y - cy) * (reduced ? 1 : .22);
+      cx += (x - cx) * (reduced ? 1 : .2); cy += (y - cy) * (reduced ? 1 : .2);
       c.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)';
+      for (var i = 0; i < lenses.length; i++) {
+        var L = lenses[i], r = L.el.getBoundingClientRect();
+        var near = cx > r.left - R && cx < r.right + R && cy > r.top - R && cy < r.bottom + R;
+        if (near) { L.copy.style.clipPath = 'circle(' + R + 'px at ' + (cx - r.left) + 'px ' + (cy - r.top) + 'px)'; L.on = true; }
+        else if (L.on) { L.copy.style.clipPath = 'circle(0 at -100px -100px)'; L.on = false; }
+      }
       requestAnimationFrame(loop);
     })();
   }
 
-  /* ------------------------------------------------------------------ Loader + sound gate (home, once a visit) */
+  /* ------------------------------------------------------------------ Slow, visible anchor scrolling */
+  function anchors() {
+    function go(id, push) {
+      var t = document.getElementById(id); if (!t) return false;
+      var y = t.getBoundingClientRect().top + scrollY;
+      if (window.gsap && window.ScrollToPlugin && !reduced) gsap.to(window, { scrollTo: { y: y, autoKill: true }, duration: Math.min(2.4, 1.2 + Math.abs(y - scrollY) / 4000), ease: 'power3.inOut' });
+      else scrollTo({ top: y, behavior: reduced ? 'auto' : 'smooth' });
+      if (push) history.replaceState(null, '', '#' + id);
+      return true;
+    }
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]'); if (!a) return;
+      var href = a.getAttribute('href'), i = href.indexOf('#'); if (i < 0) return;
+      var file = href.slice(0, i), id = href.slice(i + 1);
+      var here = location.pathname.split('/').pop() || 'index.html';
+      if (file && file !== here) return;
+      if (id && go(id, true)) e.preventDefault();
+    });
+    // arriving from another page with #contact: start at the top, then glide down
+    if (location.hash.length > 1) {
+      var id = location.hash.slice(1);
+      if (document.getElementById(id)) { history.scrollRestoration = 'manual'; scrollTo(0, 0); window.SJ.pendingHash = id; }
+    }
+    window.SJ.scrollToId = go;
+  }
+
+  /* ------------------------------------------------------------------ Loader and welcome (home, once a visit)
+     Cream screen counting assets, a flip to black, texture cards flying in,
+     then a sunflower and two ways in. */
   function runLoader(done) {
     var el = document.querySelector('.loader');
     if (!el) { done(); return; }
     if (store.sget('entered') || reduced) { el.remove(); done(); return; }
     body.style.overflow = 'hidden';
-    var countEl = el.querySelector('.loader-count'), bar = el.querySelector('.loader-bar'), status = el.querySelector('[data-status]');
-    var tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), window.SJ.heroReady || Promise.resolve(), new Promise(function (r) { if (document.readyState === 'complete') r(); else addEventListener('load', r); }), new Promise(function (r) { setTimeout(r, 1400); })];
-    var target = 0, shown = 0, finished = false;
+    var count = el.querySelector('.loader-count b'), stack = el.querySelector('.loader-stack');
+    var cards = [].slice.call(stack.children), flipped = false, flown = 0;
+    var tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), window.SJ.heroReady || Promise.resolve(),
+      new Promise(function (r) { if (document.readyState === 'complete') r(); else addEventListener('load', r); }),
+      new Promise(function (r) { setTimeout(r, 3600); })];
+    var target = 0, shown = 0, finished = false, t0 = performance.now();
     tasks.forEach(function (p) { p.then(function () { target += 100 / tasks.length; }); });
-    var labels = ['Loading fonts', 'Mixing the paint', 'Finding the pieces', 'Almost there'];
     (function tick() {
-      shown += (target - shown) * .08 + .15; if (shown > target) shown = target;
-      var v = Math.min(100, Math.round(shown));
-      countEl.textContent = (v < 10 ? '0' : '') + v;
-      bar.style.width = v + '%';
-      status.textContent = labels[Math.min(3, Math.floor(v / 26))] + ' ' + v + '/100';
-      if (v >= 100 && !finished) { finished = true; el.classList.add('is-ready'); status.textContent = 'Ready when you are'; el.querySelector('[data-enter]').focus(); return; }
+      // the counter never runs ahead of a slow, steady pace, so the sequence is always seen
+      var limit = Math.min(target, (performance.now() - t0) / 36);
+      shown += (limit - shown) * .08; if (limit - shown < .6) shown = limit;
+      var v = Math.min(100, Math.floor(shown));
+      count.textContent = (v < 10 ? '0' : '') + v;
+      if (v >= 22 && !flipped) { flipped = true; el.classList.add('is-dark'); }
+      if (flipped) { var want = Math.min(cards.length, Math.floor((v - 26) / 11) + 1); while (flown < want) fly(cards[flown], flown++); }
+      if (v >= 100 && !finished) { finished = true; setTimeout(welcome, 700); return; }
       requestAnimationFrame(tick);
     })();
+    function fly(card, i) {
+      var rot = (i % 2 ? 1 : -1) * (3 + i * 1.6), ox = (i - (cards.length - 1) / 2) * 14, oy = -i * 6;
+      card.style.transitionDelay = '0s';
+      requestAnimationFrame(function () {
+        card.classList.add('in');
+        card.style.transform = 'translate(-50%,-50%) translate(' + ox + 'px,' + oy + 'px) rotate(' + rot + 'deg)';
+      });
+    }
+    function welcome() {
+      cards.forEach(function (c, i) {
+        c.style.transition = 'transform 1.3s cubic-bezier(.7,0,.84,0) ' + i * .05 + 's, opacity .9s ease ' + (.3 + i * .05) + 's';
+        c.style.transform = 'translate(-50%,-50%) translate(' + ((i - 2.5) * 22) + 'vw, -80vh) rotate(' + ((i - 2.5) * 14) + 'deg)';
+        c.style.opacity = '0';
+      });
+      el.classList.add('is-welcome');
+      if (window.SJ.sunflower) window.SJ.sunflower(el.querySelector('.welcome canvas'));
+      setTimeout(function () { var b = el.querySelector('[data-enter]'); if (b) b.focus({ preventScroll: true }); }, 900);
+    }
     el.addEventListener('click', function (e) {
       var b = e.target.closest('[data-enter]'); if (!b) return;
-      if (b.getAttribute('data-enter') === 'sound') Sound.setOn(true); else Sound.setOn(false);
+      Sound.setOn(b.getAttribute('data-enter') === 'sound');
       store.sset('entered', '1');
       el.classList.add('is-leaving');
       body.style.overflow = '';
       done();
-      setTimeout(function () { el.remove(); }, 1200);
+      setTimeout(function () { if (window.SJ.sunflowerStop) window.SJ.sunflowerStop(); el.remove(); }, 1500);
     });
   }
 
-  /* ------------------------------------------------------------------ Small behaviours */
-  function clocks() {
-    var els = document.querySelectorAll('[data-clock]'); if (!els.length) return;
-    var fmt; try { fmt = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kolkata' }); } catch (e) { return; }
-    function tick() { var s = 'Mumbai ' + fmt.format(new Date()) + ' IST'; els.forEach(function (e) { e.textContent = s; }); }
-    tick(); setInterval(tick, 20000);
-  }
-
-  // Letters shuffle when the pointer comes close (the "SCRL" hint and labels)
-  function scramble() {
-    var els = [].slice.call(document.querySelectorAll('[data-scramble]')); if (!els.length || reduced) return;
-    var chars = '!<>-_/[]{}=+*^?#ABCDEFGHJKLMNPRSTUVWXYZ0123456789';
-    els.forEach(function (el) { el.dataset.text = el.textContent; el.setAttribute('aria-label', el.textContent); });
-    function run(el) {
-      if (el._busy) return; el._busy = true;
-      var text = el.dataset.text, frame = 0, total = 18;
-      (function step() {
-        var out = '';
-        for (var i = 0; i < text.length; i++) out += frame > total * (i + 1) / text.length ? text[i] : chars[Math.floor(Math.random() * chars.length)];
-        el.textContent = out;
-        if (++frame <= total) requestAnimationFrame(step); else { el.textContent = text; setTimeout(function () { el._busy = false; }, 400); }
-      })();
+  /* ------------------------------------------------------------------ Sunflower for the welcome screen
+     Golden-angle seeds and two rings of petals, drawn in 2D with a little
+     perspective so the head leans toward the pointer, the way sunflowers turn to light. */
+  window.SJ.sunflower = function (cv) {
+    if (!cv) return;
+    var ctx = cv.getContext('2d'), raf = 0, start = performance.now(), mx = .5, my = .3, tx = 0, ty = 0, W, H, D;
+    function size() { D = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * D; cv.height = H * D; ctx.setTransform(D, 0, 0, D, 0, 0); }
+    size(); addEventListener('resize', size);
+    cv.parentNode.addEventListener('pointermove', function (e) { mx = e.clientX / W; my = e.clientY / H; });
+    var GA = Math.PI * (3 - Math.sqrt(5)), SEEDS = 420, PET = 26;
+    var petals = []; for (var i = 0; i < PET * 2; i++) petals.push({ a: (i % PET) / PET * Math.PI * 2 + (i >= PET ? Math.PI / PET : 0), l: (i >= PET ? 1 : .86) * (.92 + Math.random() * .16), w: .2 + Math.random() * .05, back: i < PET });
+    function proj(x, y, z, cxp, cyp, R) {
+      // rotate around Y (tx) then X (ty), then a soft perspective
+      var cy = Math.cos(tx), sy = Math.sin(tx), cxr = Math.cos(ty), sx = Math.sin(ty);
+      var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
+      var y1 = y * cxr - z1 * sx, z2 = y * sx + z1 * cxr;
+      var p = 3.2 / (3.2 - z2);
+      return [cxp + x1 * R * p, cyp + y1 * R * p];
     }
-    var last = 0;
-    addEventListener('pointermove', function (e) {
-      var now = Date.now(); if (now - last < 80) return; last = now;
-      els.forEach(function (el) {
-        var r = el.getBoundingClientRect(), dx = Math.max(r.left - e.clientX, 0, e.clientX - r.right), dy = Math.max(r.top - e.clientY, 0, e.clientY - r.bottom);
-        if (Math.hypot(dx, dy) < 120) run(el);
+    function draw(now) {
+      var t = Math.min(1, (now - start) / 2600), e = 1 - Math.pow(1 - t, 3), time = now / 1000;
+      tx += (((mx - .5) * .9) - tx) * .05; ty += (((my - .35) * -.7) - ty) * .05;
+      var R = Math.min(W, H) * .12 * (.4 + .6 * e), cxp = W / 2, cyp = H * .32;
+      ctx.clearRect(0, 0, W, H);
+      // light it leans toward
+      var g = ctx.createRadialGradient(cxp + tx * 220, cyp - ty * 160, 0, cxp, cyp, R * 4);
+      g.addColorStop(0, 'rgba(245,240,230,.10)'); g.addColorStop(1, 'rgba(245,240,230,0)');
+      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+      // petals: back ring first
+      petals.forEach(function (p, i) {
+        var grow = Math.max(0, Math.min(1, e * 1.6 - (p.back ? 0 : .25) - (i % PET) / PET * .3));
+        if (!grow) return;
+        var a = p.a + Math.sin(time * .6 + i) * .015, L = (1 + p.l * 1.25 * grow), w = p.w;
+        var ca = Math.cos(a), sa = Math.sin(a), curl = .18 * grow;
+        var base = proj(ca * .9, sa * .9, 0, cxp, cyp, R);
+        var tip = proj(ca * L, sa * L, -curl * (p.back ? 1.4 : 1), cxp, cyp, R);
+        var l1 = proj(ca * (1 + (L - 1) * .5) - sa * w, sa * (1 + (L - 1) * .5) + ca * w, -curl * .4, cxp, cyp, R);
+        var r1 = proj(ca * (1 + (L - 1) * .5) + sa * w, sa * (1 + (L - 1) * .5) - ca * w, -curl * .4, cxp, cyp, R);
+        ctx.beginPath(); ctx.moveTo(base[0], base[1]);
+        ctx.quadraticCurveTo(l1[0], l1[1], tip[0], tip[1]);
+        ctx.quadraticCurveTo(r1[0], r1[1], base[0], base[1]);
+        ctx.fillStyle = p.back ? '#D9CFBE' : '#F5F0E6';
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(18,16,17,.25)'; ctx.lineWidth = .8; ctx.stroke();
       });
-    }, { passive: true });
-    els.forEach(function (el) { el.addEventListener('focus', function () { run(el); }); });
-  }
+      // seed head: golden angle spiral
+      var head = proj(0, 0, .05, cxp, cyp, R);
+      ctx.beginPath(); ctx.ellipse(head[0], head[1], R * .98 * Math.cos(tx * .9), R * .98 * Math.cos(ty * .9), 0, 0, Math.PI * 2);
+      ctx.fillStyle = '#1E1718'; ctx.fill();
+      var n = Math.floor(SEEDS * Math.min(1, e * 1.3));
+      for (var k = 1; k < n; k++) {
+        var rr = Math.sqrt(k / SEEDS) * .92, aa = k * GA;
+        var s = proj(Math.cos(aa) * rr, Math.sin(aa) * rr, .08 * (1 - rr * rr), cxp, cyp, R);
+        var pink = k % 23 === 0;
+        ctx.beginPath(); ctx.arc(s[0], s[1], R * (pink ? .03 : .022) * (.6 + rr * .6), 0, Math.PI * 2);
+        ctx.fillStyle = pink ? '#FF0592' : (k % 3 ? '#4A3A33' : '#6B5548'); ctx.fill();
+      }
+      raf = requestAnimationFrame(draw);
+    }
+    raf = requestAnimationFrame(draw);
+    window.SJ.sunflowerStop = function () { cancelAnimationFrame(raf); };
+  };
 
+  /* ------------------------------------------------------------------ Small behaviours */
   function copyEmail() {
     document.querySelectorAll('[data-copy-email]').forEach(function (b) {
       b.addEventListener('click', function () {
         var orig = b.textContent;
-        function ok() { b.textContent = 'Copied ✓'; setTimeout(function () { b.textContent = orig; }, 1600); }
+        function ok() { b.textContent = 'Copied'; setTimeout(function () { b.textContent = orig; }, 1600); }
         try { navigator.clipboard.writeText(EMAIL).then(ok, function () { b.textContent = EMAIL; }); } catch (e) { b.textContent = EMAIL; }
       });
     });
   }
 
-  // Sections marked data-theme="dark" turn the whole page black while in view
-  function themes() {
-    if (!window.ScrollTrigger) return;
-    document.querySelectorAll('[data-theme="dark"]').forEach(function (s) {
-      ScrollTrigger.create({
-        trigger: s, start: 'top 55%', end: 'bottom 45%',
-        onToggle: function (self) { body.classList.toggle('is-dark', self.isActive); }
-      });
-    });
-  }
-
   function reveals() {
-    var items = document.querySelectorAll('.reveal, .bars');
+    var items = document.querySelectorAll('.reveal');
     if (!('IntersectionObserver' in window) || reduced) { items.forEach(function (n) { n.classList.add('in'); }); return; }
-    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .18 });
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .15 });
     items.forEach(function (n) { io.observe(n); });
   }
 
   /* ------------------------------------------------------------------ Start */
+  if (window.gsap) { if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger); if (window.ScrollToPlugin) gsap.registerPlugin(ScrollToPlugin); }
   buildNav();
   buildMenu();
   buildFooter();
   buildCursor();
-  clocks();
-  scramble();
+  anchors();
   copyEmail();
   document.querySelectorAll('[data-sound]').forEach(function (b) { b.addEventListener('click', function () { Sound.setOn(!Sound.on); }); });
-  if (window.gsap && window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger);
 
-  // Returning visitors who chose sound: resume it on their first tap (browsers need one)
-  if (store.get('sound') === 'on' && store.sget('entered')) {
+  // Returning visitors who chose sound: resume on their first tap (browsers need one)
+  if (store.get('sound') === 'on' && (store.sget('entered') || !isHome)) {
     var resume = function () { Sound.setOn(true); removeEventListener('pointerdown', resume); removeEventListener('keydown', resume); };
     addEventListener('pointerdown', resume); addEventListener('keydown', resume);
   }
 
   runLoader(function () {
     reveals();
-    themes();
     window.SJ.ready = true;
     document.dispatchEvent(new CustomEvent('sj:ready'));
+    if (window.SJ.pendingHash) { var id = window.SJ.pendingHash; setTimeout(function () { window.SJ.scrollToId(id, false); }, 700); }
   });
 })();

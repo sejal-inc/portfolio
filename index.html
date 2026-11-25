@@ -9,153 +9,111 @@
 <meta property="og:title" content="Sejal Jain — Marketing Designer & Brand Strategist">
 <meta property="og:description" content="Brand strategy, design systems and content that does its job.">
 <link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
-<link rel="preload" href="assets/fonts/GrenzeGotisch.woff" as="font" type="font/woff" crossorigin>
+<link rel="preload" href="assets/fonts/UnifrakturMaguntia.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body data-page="home">
 
-<!-- Loader and sound gate: first visit in a session only -->
+<!-- Loader and welcome: first visit in a session only -->
 <div class="loader" role="dialog" aria-modal="true" aria-label="Welcome">
-  <div class="loader-top"><span>Sejal Jain</span><span data-status>Loading 0/100</span></div>
-  <div class="loader-mid">
-    <p class="loader-name"><span class="gothic">yo,</span> I’m Sejal.<br>Marketing designer<br>&amp; brand strategist.</p>
-  </div>
-  <div class="loader-bottom">
-    <div class="loader-enter">
-      <button class="btn btn--pink" type="button" data-enter="sound">Enter with sound <span class="arrow" aria-hidden="true">→</span></button>
-      <button class="btn btn--ghost" type="button" data-enter="quiet">Enter without sound</button>
+  <div class="loader-flip" aria-hidden="true"></div>
+  <div class="loader-stack" aria-hidden="true"><i class="tx2"></i><i class="tx1"></i><i class="tx6"></i><i class="tx3"></i><i class="tx4"></i><i class="tx5"></i></div>
+  <p class="loader-count">Loading assets <b>00</b>/100</p>
+  <div class="welcome">
+    <canvas aria-hidden="true"></canvas>
+    <div class="welcome-inner">
+      <h2>Welcome aboard</h2>
+      <div class="row">
+        <button class="pill primary" type="button" data-enter="sound">Dive into the experience</button>
+        <button class="pill" type="button" data-enter="quiet">Enter without audio</button>
+      </div>
     </div>
-    <span class="loader-count" aria-hidden="true">00</span>
   </div>
-  <span class="loader-bar" aria-hidden="true"></span>
 </div>
 
 <div class="page">
 
-  <!-- Hero: liquid metallic paint, full screen -->
+  <!-- Hero: a tunnel rushing forward; colour bleeds in where the cursor goes; the name appears under it -->
   <header class="hero">
     <div class="hero-fallback" aria-hidden="true"></div>
     <canvas id="paint" aria-hidden="true"></canvas>
-    <div class="hero-inner">
-      <div class="hero-top"><span>Sejal Jain</span><span>Portfolio · 2026</span></div>
-      <div>
-        <h1 class="hero-title"><span class="yo">yo,</span><span class="name">I’m Sejal Jain.</span></h1>
-        <p class="hero-sub">Marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and harder to forget.</p>
-      </div>
-      <div class="hero-bottom">
-        <span data-clock>Mumbai</span>
-        <span class="scrl" data-scramble>SCRL</span>
-        <span>Brand · Content · Design</span>
-      </div>
-    </div>
+    <h1 class="hero-name">Sejal Jain</h1>
+    <div class="hero-hit" aria-hidden="true"></div>
+    <span class="scrl" aria-hidden="true">SCRL</span>
   </header>
 
-  <!-- Navigation starts at the bottom of the hero and docks at the top -->
-  <div class="nav-dock is-hero"></div>
-
-  <!-- Intro statement -->
-  <section class="section wrap">
-    <p class="kicker">Hello</p>
-    <p class="statement" data-words style="margin-top:28px">Four years across SaaS and D2C brands. I set the strategy, design the system and check the numbers, so the work looks good <span class="gothic">and</span> does its job.</p>
+  <!-- Intro -->
+  <section class="section wrap intro">
+    <p class="label reveal">Hello, I’m Sejal</p>
+    <p class="reveal">A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
+    <div class="num-ctas reveal" style="justify-content:center">
+      <a class="btn" href="#work">See selected work <span class="arrow" aria-hidden="true">↓</span></a>
+      <a class="btn btn--line" href="about.html">About me</a>
+    </div>
   </section>
 
-  <!-- Selected work: one project per screen -->
-  <section class="section wrap dark" id="work" data-theme="dark" style="padding-top:clamp(80px,10vw,140px)">
-    <div class="section-head">
-      <h2 class="display h2">Selected <span class="gothic pink">work</span></h2>
-      <span class="count">03 projects</span>
-    </div>
-
-    <div class="stack">
-      <a class="card" href="case-blog.html" data-cursor="View">
-        <div class="art art-blog" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
-        <span class="ph-note">Mockup coming</span>
-        <div class="card-body">
-          <div>
-            <div class="card-tags"><span class="tag">Design systems</span><span class="tag">Content design</span><span class="tag">CMS components</span><span class="tag">Measurement</span></div>
-            <h3>Rebuilt, not repainted</h3>
-            <p class="client">B2B SaaS, spend management · 2023 to now</p>
-          </div>
-          <div class="card-stat"><b>3</b><span>blog design systems in three years, through two rebrands</span></div>
-        </div>
-      </a>
-
-      <a class="card" href="case-linen.html" data-cursor="View">
-        <div class="art art-linen" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
-        <span class="ph-note">Mockup coming</span>
-        <div class="card-body">
-          <div>
-            <div class="card-tags"><span class="tag">Brand voice</span><span class="tag">Search strategy</span><span class="tag">Product copy</span><span class="tag">Analytics</span></div>
-            <h3>Winning back Google in six months</h3>
-            <p class="client">D2C home linen brand, India · 2026</p>
-          </div>
-          <div class="card-stat"><b>+80%</b><span>clicks from product searches in six months</span></div>
-        </div>
-      </a>
-
-      <div class="card is-soon" aria-label="Lantana, case study coming soon">
-        <div class="art art-lantana" aria-hidden="true"></div><div class="shade" aria-hidden="true"></div>
-        <div class="card-body">
-          <div>
-            <div class="card-tags"><span class="tag">Concept</span><span class="tag">Campaign</span><span class="tag">Brand</span></div>
-            <h3>An invasive weed, worth bidding on</h3>
-            <p class="client">Passion project · since 2023</p>
-          </div>
-          <div class="card-stat"><b>soon</b><span>Case study in progress</span></div>
-        </div>
+  <!-- Selected work: one wide image at a time, three titles with timers -->
+  <section id="work" aria-label="Selected work">
+    <div class="wrap sec-head"><h2>Selected work</h2><a class="label" href="work.html">View all work <span class="arrow" aria-hidden="true">→</span></a></div>
+    <div class="reel" data-reel style="margin-top:16px">
+      <a class="reel-slide is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
+      <a class="reel-slide" href="case-linen.html" data-cursor="work" aria-label="Winning back Google in six months: view case study"><div class="art art-linen" aria-hidden="true"></div></a>
+      <div class="reel-slide is-soon" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
+      <div class="reel-titles">
+        <button class="reel-title is-on" type="button"><i></i><b>Rebuilt, not repainted</b><span>B2B SaaS · Design systems · Content design</span></button>
+        <button class="reel-title" type="button"><i></i><b>Winning back Google</b><span>D2C home linen · Brand voice · Search</span></button>
+        <button class="reel-title" type="button"><i></i><b>An invasive weed, worth bidding on</b><span>Passion project · Campaign · Brand</span></button>
       </div>
     </div>
   </section>
 
-  <!-- Results, impossible to miss -->
-  <section class="section wrap" style="padding-bottom:0">
-    <p class="kicker" style="margin-bottom:28px">What the work did</p>
-    <div class="stats reveal">
-      <div class="stat"><b>+80%</b><span>clicks from product searches for a D2C brand, in six months</span></div>
-      <div class="stat"><b>Top 3</b><span>on Google for that brand’s core product searches</span></div>
-      <div class="stat"><b>3×</b><span>blog conversion at a SaaS company, even as traffic fell</span></div>
-      <div class="stat"><b>2</b><span>category leaders adopted the blog format I started</span></div>
+  <!-- What the work did -->
+  <section class="section wrap numbers" aria-label="Results">
+    <div class="copy reveal"><p>Good design is half the job. The other half is proving it worked.</p></div>
+    <div class="num-row reveal">
+      <div class="num"><b class="lens">+80%</b><span>clicks from product searches for a D2C brand, in six months</span></div>
+      <div class="num"><b class="lens">Top 3</b><span>on Google for that brand’s core products</span></div>
+      <div class="num"><b class="lens">2.6×</b><span>clicks to its collection pages from Google</span></div>
+      <div class="num"><b class="lens">2</b><span>category leaders adopted a blog format I started</span></div>
     </div>
-    <p class="stats-note">Sources in each case study.</p>
+    <div class="num-ctas reveal">
+      <a class="btn" href="work.html">Read the case studies <span class="arrow" aria-hidden="true">→</span></a>
+    </div>
   </section>
 
   <!-- Brands -->
-  <section class="section wrap">
-    <div class="section-head">
-      <h2 class="display h2">Brands I’ve <span class="gothic pink">shaped</span></h2>
-      <a class="btn btn--ghost" href="backyard.html">See the backyard <span class="arrow" aria-hidden="true">→</span></a>
-    </div>
-    <div class="brands reveal">
+  <section class="wrap" aria-label="Brands" style="padding-bottom:clamp(88px,11vw,168px)">
+    <div class="sec-head"><h2>Brands I’ve worked with</h2><span class="label">Hover for the work</span></div>
+    <div class="brands">
       <div class="brand"><b>Sage Expense Management</b><span>In-house · 2023 to now</span></div>
-      <div class="brand gothic-b"><b>G20</b><span>Reports and collateral · 2023</span></div>
+      <div class="brand"><b class="gothic">G20</b><span>Reports and collateral · 2023</span></div>
       <div class="brand"><b>TEDx</b><span>Event identity · 2024</span></div>
       <div class="brand"><b>MAHE Bengaluru</b><span>Identity system · 2024</span></div>
       <div class="brand"><b>GOx</b><span>Brand work · 2024</span></div>
-      <div class="brand gothic-b"><b>Ledure</b><span>Lighting packaging · 2023</span></div>
+      <div class="brand"><b class="gothic">Ledure</b><span>Lighting packaging · 2023</span></div>
       <div class="brand"><b>Manohar International Airport</b><span>Brand extensions</span></div>
       <div class="brand"><b>Oxford Bookstore</b><span>Centenary campaign</span></div>
     </div>
   </section>
 
-  <!-- Skills -->
-  <section class="section wrap" style="padding-top:0">
-    <div class="section-head">
-      <h2 class="display h2">What I’m <span class="gothic pink">good</span> at</h2>
-      <span class="count">06 skills</span>
-    </div>
-    <div class="skills">
-      <article class="skill reveal"><span class="n">i.</span><div><h3>Brand strategy and positioning</h3><p>Finding what a brand stands for, who it’s for, and the words that say it.</p></div></article>
-      <article class="skill reveal"><span class="n">ii.</span><div><h3>Design systems</h3><p>Systems that survive rebrands, scale across teams and stay recognisable.</p></div></article>
-      <article class="skill reveal"><span class="n">iii.</span><div><h3>Content design</h3><p>Long, dense ideas turned into visuals and pages people actually finish.</p></div></article>
-      <article class="skill reveal"><span class="n">iv.</span><div><h3>Search and AI visibility</h3><p>Pages built to rank on Google and show up in ChatGPT and AI Overviews.</p></div></article>
-      <article class="skill reveal"><span class="n">v.</span><div><h3>Campaigns and launches</h3><p>Reports, events and go-to-market material that sales and partners use.</p></div></article>
-      <article class="skill reveal"><span class="n">vi.</span><div><h3>Measurement</h3><p>Clean data and dashboards, so creative decisions rest on evidence.</p></div></article>
+  <!-- Skills: one slow strip -->
+  <section aria-label="Skills" style="padding-bottom:clamp(88px,11vw,168px)">
+    <div class="wrap sec-head" style="border-bottom:0"><h2>What I’m good at</h2><span class="label">Six things, done properly</span></div>
+    <div class="skills-strip">
+      <div class="skills-track">
+        <article class="skill"><span class="n">i</span><b>Brand strategy</b><p>What a brand stands for, who it’s for and the words that say it.</p></article>
+        <article class="skill"><span class="n">ii</span><b>Design systems</b><p>Systems that survive rebrands and stay recognisable.</p></article>
+        <article class="skill"><span class="n">iii</span><b>Content design</b><p>Dense ideas turned into pages people actually finish.</p></article>
+        <article class="skill"><span class="n">iv</span><b>Search and AI visibility</b><p>Pages that rank on Google and show up in AI answers.</p></article>
+        <article class="skill"><span class="n">v</span><b>Campaigns and launches</b><p>Reports, events and material that sales teams use.</p></article>
+        <article class="skill"><span class="n">vi</span><b>Measurement</b><p>Clean data, so creative decisions rest on evidence.</p></article>
+      </div>
     </div>
   </section>
 
-  <!-- About teaser: the puzzle breaks apart to uncover one line -->
+  <!-- The puzzle: the centre piece is missing; scrolling lifts the rest away -->
   <section class="puzzle" aria-label="About">
-    <div class="puzzle-stage">
+    <div class="puzzle-stage" data-cursor="puzzle">
       <div class="puzzle-line">
         <p>Every brand is a <span class="gothic">puzzle.</span> I find the piece that’s missing.</p>
         <a class="btn" href="about.html">More about me <span class="arrow" aria-hidden="true">→</span></a>
@@ -166,13 +124,13 @@
 
   <!-- Contact -->
   <section class="section wrap contact" id="contact">
-    <p class="kicker" style="justify-content:center;margin-bottom:28px">Contact</p>
+    <p class="label" style="margin-bottom:24px">Contact</p>
     <h2 class="display h2">Got a brand that needs to be <span class="gothic">understood?</span></h2>
-    <a class="big-cta" href="mailto:jsejaldesigns@gmail.com" data-cursor="Write">Say yo <span aria-hidden="true">→</span></a>
+    <a class="big-cta" href="mailto:jsejaldesigns@gmail.com">Say yo <span class="arrow" aria-hidden="true">→</span></a>
     <div class="contact-links">
-      <button class="btn btn--ghost copy-mail" type="button" data-copy-email>Copy email</button>
-      <a class="btn btn--ghost" href="https://www.linkedin.com/in/jain-sejal" target="_blank" rel="noopener">LinkedIn ↗</a>
-      <a class="btn btn--ghost" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+      <button class="btn btn--line" type="button" data-copy-email>Copy email</button>
+      <a class="btn btn--line" href="https://www.linkedin.com/in/jain-sejal" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="btn btn--line" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
     </div>
   </section>
 </div>
@@ -180,6 +138,7 @@
 <script src="assets/js/hero.js"></script>
 <script src="assets/vendor/gsap.min.js" defer></script>
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
+<script src="assets/vendor/ScrollToPlugin.min.js" defer></script>
 <script src="assets/js/site.js" defer></script>
 <script src="assets/js/home.js" defer></script>
 </body>

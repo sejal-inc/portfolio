@@ -25,7 +25,7 @@ Contrast rule: pink is never used for small text on cream (3.2:1). Black on pink
 
 ## What it's built with (all free)
 - **GSAP + ScrollTrigger** (`assets/vendor`): scroll animation. Free for commercial use under GSAP's "Standard No Charge" licence (gsap.com/standard-license).
-- **Fonts** (`assets/fonts`): Geist and Grenze Gotisch, both SIL Open Font License (licence files included), subset to Latin.
+- **Fonts** (`assets/fonts`): Geist and UnifrakturMaguntia, both SIL Open Font License (licence files included), subset to Latin.
 - **Hero paint**: one hand-written WebGL shader (`assets/js/hero.js`), no library.
 - **Sound**: generated in the browser with Web Audio (`assets/js/site.js`), no audio files.
 - **Page transitions**: the browser's built-in View Transitions (Chrome, Edge, Safari); other browsers just load normally.
