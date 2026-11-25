@@ -11,7 +11,7 @@
 <link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fonts/UnifrakturMaguntia.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="preload" href="assets/img/macro/m00.jpg" as="image">
-<link rel="preload" href="assets/img/field.jpg" as="image">
+
 <link rel="stylesheet" href="assets/css/main.css">
 <script>try{if(sessionStorage.getItem("sj.pt"))document.documentElement.classList.add("pt-in")}catch(e){}</script>
 </head>
@@ -25,9 +25,9 @@
     <span class="loader-br r" aria-hidden="true">)</span>
   </div>
   <div class="void" aria-hidden="true">
-    <span class="void-row"><span>d&nbsp;s&nbsp;gn</span><span class="g">( Marketing&nbsp;Designer )</span><span>Str&nbsp;t&nbsp;g&nbsp;st</span></span>
-    <span class="void-row"><span class="void-2"><span>L</span><span class="g">( Mumbai )</span><span>C</span></span><span>t&nbsp;n</span></span>
-    <span class="void-row alt"><span class="void-3"><span>P&nbsp;r</span><span class="g">( 2026 )</span></span><span>TF&nbsp;&nbsp;&nbsp;L</span></span>
+    <span class="void-row"><span>Brand</span><span class="g">( Marketing&nbsp;Designer )</span><span>Strategy</span></span>
+    <span class="void-row"><span>Based&nbsp;in</span><span class="g">( Mumbai )</span><span>India</span></span>
+    <span class="void-row"><span>Portfolio</span><span class="g">( 2026 )</span><span>Selected&nbsp;work</span></span>
   </div>
   <button class="loader-go" type="button" aria-label="Enter with sound"></button>
   <span class="loader-hint" aria-hidden="true">Click to enter with sound</span>
@@ -38,21 +38,19 @@
 
 <div class="page">
 
-  <!-- Hero: a sunflower field made of points. They settle into place on arrival and drain away to white when you scroll; then the intro rises in. -->
-  <div class="hero-wrap">
-    <div class="hero-stage">
-      <section class="intro wrap" aria-label="Introduction">
-        <p class="label" data-rise>Hello, I’m Sejal</p>
-        <p class="intro-text" data-rise>A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
-      </section>
-      <header class="hero" data-dark>
-        <div class="hero-fallback" aria-hidden="true"></div>
-        <canvas id="paint" aria-hidden="true"></canvas>
-        <h1 class="sr-only">Sejal Jain, marketing designer and brand strategist</h1>
-        <span class="scrl" aria-hidden="true">(&nbsp;<span class="g">s cr l</span>&nbsp;)</span>
-      </header>
-    </div>
-  </div>
+  <!-- Hero: running through a sunflower field, from below the flowers to above them -->
+  <header class="hero" data-dark>
+    <video id="run" class="hero-video" src="assets/video/run.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
+    <canvas id="paint" aria-hidden="true"></canvas>
+    <h1 class="sr-only">Sejal Jain, marketing designer and brand strategist</h1>
+    <span class="scrl" aria-hidden="true">(&nbsp;<span class="g">s cr l</span>&nbsp;)</span>
+  </header>
+
+  <!-- Intro: unveiled as it comes into view -->
+  <section class="intro wrap" aria-label="Introduction">
+    <p class="label unveil">Hello, I’m Sejal</p>
+    <p class="intro-text unveil">A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
+  </section>
 
   <!-- Selected work: a full-viewport image, then the three titles with timers on a rounded sheet -->
   <section id="work" class="work-reel" aria-label="Selected work" data-reel>
@@ -140,6 +138,7 @@
 </div>
 
 <script src="assets/js/hero.js" defer></script>
+<script src="assets/vendor/lenis.min.js" defer></script>
 <script src="assets/vendor/gsap.min.js" defer></script>
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/ScrollToPlugin.min.js" defer></script>

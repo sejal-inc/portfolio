@@ -41,15 +41,18 @@ def petal_build(n, l, p, out):
     l.new(uv.outputs[0], wave.inputs['Vector'])
     mix = n.new('ShaderNodeMix'); mix.data_type = 'RGBA'; mix.blend_type = 'MULTIPLY'; mix.inputs[0].default_value = .22
     l.new(ramp.outputs[0], mix.inputs[6]); l.new(wave.outputs['Color'], mix.inputs[7])
-    l.new(mix.outputs[2], p.inputs['Base Color'])
+    # per-petal variation in hue/brightness, from position
+    oi = n.new('ShaderNodeObjectInfo'); tcv = n.new('ShaderNodeTexCoord'); nz = n.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 40
+    l.new(tcv.outputs['Object'], nz.inputs['Vector'])
+    hsv = n.new('ShaderNodeHueSaturation'); hsv.inputs['Hue'].default_value = .5
+    mr = n.new('ShaderNodeMapRange'); mr.inputs['To Min'].default_value = .82; mr.inputs['To Max'].default_value = 1.12
+    l.new(nz.outputs['Fac'], mr.inputs[0]); l.new(mr.outputs[0], hsv.inputs['Value'])
+    l.new(mix.outputs[2], hsv.inputs['Color']); l.new(hsv.outputs[0], p.inputs['Base Color'])
     p.inputs['Roughness'].default_value = .55
-    p.inputs['Subsurface Weight'].default_value = .25
-    p.inputs['Subsurface Radius'].default_value = (.4, .25, .05)
-    p.inputs['Subsurface Scale'].default_value = .004
     bump = n.new('ShaderNodeBump'); bump.inputs['Strength'].default_value = .25
     l.new(wave.outputs['Fac'], bump.inputs['Height']); l.new(bump.outputs[0], p.inputs['Normal'])
-    tr = n.new('ShaderNodeBsdfTranslucent'); l.new(mix.outputs[2], tr.inputs['Color'])
-    ms = n.new('ShaderNodeMixShader'); ms.inputs[0].default_value = .3
+    tr = n.new('ShaderNodeBsdfTranslucent'); l.new(hsv.outputs[0], tr.inputs['Color'])
+    ms = n.new('ShaderNodeMixShader'); ms.inputs[0].default_value = .4
     l.new(p.outputs[0], ms.inputs[1]); l.new(tr.outputs[0], ms.inputs[2]); l.new(ms.outputs[0], out.inputs[0])
 
 def green_build(dark, rough=.6, trans=.25):
@@ -143,9 +146,11 @@ def head_parts(R=.12, florets=1400):
                     loop[uvl].uv = (a2 / nu, b2 / nv)
     bm = bmesh.new()
     for k in range(34):
-        petal(bm, k / 34 * math.tau + random.uniform(-.05, .05), R * random.uniform(1.05, 1.35), R * .26, -R * .02, R * random.uniform(.18, .5), random.uniform(-.35, .35))
-    for k in range(21):
-        petal(bm, (k + .5) / 21 * math.tau + random.uniform(-.06, .06), R * random.uniform(.95, 1.2), R * .25, R * .1, R * random.uniform(.1, .35), random.uniform(-.4, .4))
+        petal(bm, k / 34 * math.tau + random.uniform(-.06, .06), R * random.uniform(1.0, 1.4), R * .22, -R * .03, R * random.uniform(.15, .6), random.uniform(-.45, .45))
+    for k in range(26):
+        petal(bm, (k + .5) / 26 * math.tau + random.uniform(-.07, .07), R * random.uniform(.9, 1.25), R * .21, R * .08, R * random.uniform(.08, .4), random.uniform(-.5, .5))
+    for k in range(13):   # a few shorter, more upright petals close to the disc
+        petal(bm, random.uniform(0, math.tau), R * random.uniform(.55, .8), R * .17, R * .22, R * random.uniform(.02, .12), random.uniform(-.5, .5))
     parts.append(add_mesh(bm, 'petals', M_PETAL))
     # green bracts behind the petals
     bm = bmesh.new()
@@ -199,13 +204,13 @@ def sunflower(name, height, nod, face_yaw, seed):
     so = bpy.data.objects.new('stem', cu); bpy.context.collection.objects.link(so); so.data.materials.append(M_STEM)
     # leaves, alternating up the stem
     bm = bmesh.new()
-    for k in range(7):
-        t = .2 + k * .1
-        if t > .85: break
+    for k in range(10):
+        t = .12 + k * .075
+        if t > .86: break
         p = Vector((0, 0, t * height)) + bend * (t * t)
         ang = k * 2.4 + random.uniform(-.3, .3)
         d = Vector((math.cos(ang), math.sin(ang), .35)).normalized()
-        size = .34 * (1.15 - t * .6)
+        size = .4 * (1.2 - t * .65)
         leaf(bm, p, d, size, size * .95, random.uniform(.3, .6))
     lo = add_mesh(bm, 'leaves', M_LEAF)
     # head: built facing +Z, turned to face -Y and nodding down
@@ -227,6 +232,28 @@ def world_sky(zenith, horizon, ground, strength=1):
     r.elements[1].position = .8; r.elements[1].color = zenith
     e = r.elements.new(.505); e.color = horizon
     l.new(ramp.outputs[0], bg.inputs['Color'])
+def happy_sky(strength=1.0):
+    world = bpy.data.worlds.new('sky'); sc.world = world; world.use_nodes = True
+    n = world.node_tree.nodes; l = world.node_tree.links; bg = n['Background']
+    sky = n.new('ShaderNodeTexSky'); sky.sky_type = 'NISHITA'; sky.sun_elevation = math.radians(38); sky.sun_rotation = math.radians(200)
+    sky.sun_disc = False; sky.air_density = 1.0; sky.dust_density = .5
+    # clouds: soft noise, only above the horizon
+    tc = n.new('ShaderNodeTexCoord'); mp = n.new('ShaderNodeMapping'); mp.inputs['Scale'].default_value = (1.2, 1.2, 3.0)
+    l.new(tc.outputs['Generated'], mp.inputs['Vector'])
+    nz = n.new('ShaderNodeTexNoise'); nz.inputs['Scale'].default_value = 2.2; nz.inputs['Detail'].default_value = 8; nz.inputs['Roughness'].default_value = .55
+    l.new(mp.outputs[0], nz.inputs['Vector'])
+    cr = n.new('ShaderNodeValToRGB'); cr.color_ramp.elements[0].position = .48; cr.color_ramp.elements[1].position = .62
+    l.new(nz.outputs['Fac'], cr.inputs[0])
+    sep = n.new('ShaderNodeSeparateXYZ'); l.new(tc.outputs['Generated'], sep.inputs[0])
+    up = n.new('ShaderNodeMapRange'); up.inputs['From Min'].default_value = .02; up.inputs['From Max'].default_value = .3
+    l.new(sep.outputs['Z'], up.inputs[0])
+    m1 = n.new('ShaderNodeMath'); m1.operation = 'MULTIPLY'; l.new(cr.outputs[0], m1.inputs[0]); l.new(up.outputs[0], m1.inputs[1])
+    mx = n.new('ShaderNodeMix'); mx.data_type = 'RGBA'; mx.inputs[7].default_value = (1.6, 1.6, 1.65, 1)
+    hs = n.new('ShaderNodeHueSaturation'); hs.inputs['Saturation'].default_value = 1.6; hs.inputs['Value'].default_value = .9
+    l.new(sky.outputs[0], hs.inputs['Color'])
+    l.new(m1.outputs[0], mx.inputs[0]); l.new(hs.outputs[0], mx.inputs[6])
+    l.new(mx.outputs[2], bg.inputs['Color']); bg.inputs['Strength'].default_value = strength
+
 def sun(elev, azim, strength=4.5, color=(1, .78, .5)):
     bpy.ops.object.light_add(type='SUN'); s = bpy.context.object
     s.data.energy = strength; s.data.color = color; s.data.angle = math.radians(1.5)
@@ -323,4 +350,59 @@ elif MODE == 'field':
     fo.file_slots[0].path = 'depth_'
     L.new(rl.outputs['Mist'], fo.inputs[0])
     render(f'{OUT}/field.png')
+
+if MODE.startswith('fly'):
+    F0, F1 = (int(args[5]), int(args[6])) if len(args) > 6 else (1, 1)
+    FRAMES = 96
+    variants = [sunflower(f'sf{k}', random.uniform(1.55, 1.95), random.uniform(12, 30), random.uniform(-.2, .2), 10 + k) for k in range(5)]
+    for v in variants: bpy.context.view_layer.layer_collection.children[v.name].exclude = True
+    random.seed(21)
+    count = 0; y = -3.5; half = math.radians(40)
+    while y < 75:
+        step = .5 + max(0, y) * .01
+        span = 2 + (y + 4) * math.tan(half)
+        x = -span
+        while x < span:
+            if not (abs(x) < .38 and y < 14):          # a narrow row left open for the camera to run along
+                v = random.choice(variants)
+                e = bpy.data.objects.new('i', None); e.instance_type = 'COLLECTION'; e.instance_collection = v
+                e.location = (x + random.uniform(-.12, .12), y + random.uniform(-.12, .12), random.uniform(-.2, .05))
+                e.rotation_euler = (0, 0, random.uniform(-.3, .3)); s_ = random.uniform(.88, 1.12); e.scale = (s_, s_, s_)
+                bpy.context.collection.objects.link(e); count += 1
+            x += step * random.uniform(.85, 1.1)
+        y += step
+    print('instances', count)
+    bpy.ops.mesh.primitive_plane_add(size=300, location=(0, 60, -.1))
+    bpy.context.object.data.materials.append(mat('soil', flat((.09, .06, .035, 1), .95)))
+    happy_sky(1.0)
+    sun(38, -160, 3.6, (1, .95, .86))          # high, clean light from behind the camera
+    cd = bpy.data.cameras.new('cam'); cd.lens = 28; cd.clip_end = 400
+    cd.dof.use_dof = True; cd.dof.aperture_fstop = 2.8
+    cam = bpy.data.objects.new('cam', cd); bpy.context.collection.objects.link(cam); sc.camera = cam
+    tgt = bpy.data.objects.new('focus', None); bpy.context.collection.objects.link(tgt); cd.dof.focus_object = tgt
+    def ease(t): return t * t * (3 - 2 * t)
+    vl = sc.view_layers[0]; vl.use_pass_mist = True
+    sc.world.mist_settings.start = 6; sc.world.mist_settings.depth = 80; sc.world.mist_settings.falloff = 'QUADRATIC'
+    sc.cycles.samples = SAMPLES
+    sc.cycles.max_bounces = 3; sc.cycles.diffuse_bounces = 1; sc.cycles.transmission_bounces = 2; sc.cycles.glossy_bounces = 1
+    sc.render.use_simplify = False
+    # light aerial haze into the distance (bluish, daylight)
+    sc.use_nodes = True; nt = sc.node_tree; nt.nodes.clear(); L = nt.links
+    rl = nt.nodes.new('CompositorNodeRLayers')
+    pw = nt.nodes.new('CompositorNodeMath'); pw.operation = 'MULTIPLY'; pw.inputs[1].default_value = .35
+    L.new(rl.outputs['Mist'], pw.inputs[0])
+    mix = nt.nodes.new('CompositorNodeMixRGB'); mix.inputs[2].default_value = (.75, .85, 1, 1)
+    L.new(pw.outputs[0], mix.inputs[0]); L.new(rl.outputs['Image'], mix.inputs[1])
+    co = nt.nodes.new('CompositorNodeComposite'); L.new(mix.outputs[0], co.inputs[0])
+    fo = nt.nodes.new('CompositorNodeOutputFile'); fo.base_path = OUT + '/depth'; fo.format.file_format = 'PNG'; fo.format.color_depth = '16'; fo.format.color_mode = 'BW'
+    L.new(rl.outputs['Mist'], fo.inputs[0])
+    for f in range(F0, F1 + 1):
+        t = ease((f - 1) / (FRAMES - 1))
+        cam.location = (math.sin(t * 2.2) * .12, -2.6 + t * 9.5, .55 + t * 2.4)       # run forward, growing taller
+        look = Vector((math.sin(t * 2.2 + .4) * .2, 6 + t * 22, 1.95 - t * 1.0))      # first up at the heads, then out across the field
+        d = look - Vector(cam.location); cam.rotation_euler = d.to_track_quat('-Z', 'Y').to_euler()
+        tgt.location = Vector(cam.location) + d.normalized() * (2.2 + t * 6)
+        sc.frame_set(f)
+        sc.render.filepath = f'{OUT}/f{f:04d}.png'
+        bpy.ops.render.render(write_still=True)
 print('done')
