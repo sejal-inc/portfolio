@@ -78,8 +78,29 @@
     });
   }
 
+  /* ---------------- Leaving the hero: it lifts up and out of frame, the intro rises in word by word */
+  function heroOut() {
+    var wrap = document.querySelector('.hero-wrap'); if (!wrap || !window.gsap || !window.ScrollTrigger) return;
+    wrap.querySelectorAll('[data-rise]').forEach(function (el) {
+      var html = '';
+      [].slice.call(el.childNodes).forEach(function (n) {
+        if (n.nodeType === 3) html += n.textContent.split(/(\s+)/).map(function (w) { return /\S/.test(w) ? '<span class="rise-w"><span>' + w + '</span></span>' : w; }).join('');
+        else html += '<span class="rise-w"><span>' + n.outerHTML + '</span></span>';
+      });
+      el.innerHTML = html;
+    });
+    var words = wrap.querySelectorAll('.rise-w > span');
+    gsap.set(words, { yPercent: 115 });
+    var tl = gsap.timeline({ scrollTrigger: { trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: .8,
+      onUpdate: function (st) { if (window.SJ.heroScroll) window.SJ.heroScroll(Math.min(1, st.progress / .62)); } } });
+    tl.to('.hero .scrl', { y: -30, opacity: 0, duration: .12, ease: 'power1.in' }, 0)
+      .to('.hero', { yPercent: -100, duration: .55, ease: 'power2.in' }, .04)
+      .to(words, { yPercent: 0, duration: .32, stagger: .012, ease: 'power3.out' }, .44)
+      .to({}, { duration: .12 });
+  }
+
   function init() {
-    reel(); skills(); puzzle();
+    heroOut(); reel(); skills(); puzzle();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   if (window.SJ && window.SJ.ready) init(); else document.addEventListener('sj:ready', init);

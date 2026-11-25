@@ -10,45 +10,53 @@
 <meta property="og:description" content="Brand strategy, design systems and content that does its job.">
 <link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fonts/UnifrakturMaguntia.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/img/tex/t07.jpg" as="image">
+<link rel="preload" href="assets/img/tex/t01.jpg" as="image">
 <link rel="stylesheet" href="assets/css/main.css">
 <script>try{if(sessionStorage.getItem("sj.pt"))document.documentElement.classList.add("pt-in")}catch(e){}</script>
 </head>
 <body data-page="home">
 
 <!-- Loader: first visit in a session only -->
-<div class="loader" role="dialog" aria-modal="true" aria-label="Welcome">
+<div class="loader" role="dialog" aria-modal="true" aria-label="Loading">
   <div class="loader-frame">
     <span class="loader-br l" aria-hidden="true">(</span>
-    <div class="loader-hole" aria-hidden="true"><i class="tx2"></i><i class="art art-blog"></i><i class="tx3"></i><i class="tx7">Sejal</i><i class="tx1"></i><i class="art art-linen"></i><i class="tx6"></i><i class="tx4"></i><i class="art art-lantana"></i><i class="tx5"></i></div>
+    <div class="loader-hole" aria-hidden="true"><i style="background-image:url(assets/img/tex/t07.jpg)"></i><i style="background-image:url(assets/img/tex/t01.jpg)"></i><i style="background-image:url(assets/img/tex/t04.jpg)"></i><i style="background-image:url(assets/img/tex/t02.jpg)"></i><i style="background-image:url(assets/img/tex/t03.jpg)"></i><i style="background-image:url(assets/img/tex/t10.jpg)"></i><i style="background-image:url(assets/img/tex/t05.jpg)"></i><i style="background-image:url(assets/img/tex/t06.jpg)"></i><i style="background-image:url(assets/img/tex/t08.jpg)"></i><i style="background-image:url(assets/img/tex/t09.jpg)"></i></div>
     <span class="loader-br r" aria-hidden="true">)</span>
   </div>
-  <p class="loader-title">Welcome aboard</p>
-  <p class="loader-tap">Tap anywhere to dive in, with sound</p>
-  <button class="loader-go" type="button" aria-label="Dive into the experience, with sound"></button>
-  <span class="loader-hint" aria-hidden="true">Click anywhere to dive in, with sound</span>
+  <div class="void" aria-hidden="true">
+    <span class="void-row"><span>d&nbsp;s&nbsp;gn</span><span class="g">( Marketing&nbsp;Designer )</span><span>Str&nbsp;t&nbsp;g&nbsp;st</span></span>
+    <span class="void-row"><span class="void-2"><span>L</span><span class="g">( Mumbai )</span><span>C</span></span><span>t&nbsp;n</span></span>
+    <span class="void-row alt"><span class="void-3"><span>P&nbsp;r</span><span class="g">( 2026 )</span></span><span>TF&nbsp;&nbsp;&nbsp;L</span></span>
+  </div>
+  <button class="loader-go" type="button" aria-label="Enter with sound"></button>
+  <span class="loader-hint" aria-hidden="true">Click to enter with sound</span>
+  <p class="loader-tap">Tap to enter with sound</p>
   <p class="loader-status" aria-live="polite">( LOADING )</p>
   <button class="loader-skip" type="button">Enter without sound</button>
 </div>
 
 <div class="page">
 
-  <!-- Hero: a tunnel rushing forward; colour bleeds in where the cursor goes; the name appears under it -->
-  <header class="hero">
-    <div class="hero-fallback" aria-hidden="true"></div>
-    <canvas id="paint" aria-hidden="true"></canvas>
-    <h1 class="hero-name">Sejal Jain</h1>
-    <span class="scrl" aria-hidden="true">SCRL</span>
-  </header>
-
-  <!-- Intro -->
-  <section class="section wrap intro">
-    <p class="label reveal">Hello, I’m Sejal</p>
-    <p class="reveal">A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
-  </section>
+  <!-- Hero: a storm of liquid metal around a sunflower. Scrolling lifts it out of frame and the intro rises in. -->
+  <div class="hero-wrap">
+    <div class="hero-stage">
+      <section class="intro wrap" aria-label="Introduction">
+        <p class="label" data-rise>Hello, I’m Sejal</p>
+        <p class="intro-text" data-rise>A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
+      </section>
+      <header class="hero" data-dark>
+        <div class="hero-fallback" aria-hidden="true"></div>
+        <canvas id="paint" aria-hidden="true"></canvas>
+        <h1 class="sr-only">Sejal Jain, marketing designer and brand strategist</h1>
+        <span class="scrl" aria-hidden="true">(&nbsp;<span class="g">s cr l</span>&nbsp;)</span>
+      </header>
+    </div>
+  </div>
 
   <!-- Selected work: a full-viewport image, then the three titles with timers on a rounded sheet -->
   <section id="work" class="work-reel" aria-label="Selected work" data-reel>
-    <div class="reel">
+    <div class="reel" data-dark>
       <a class="reel-slide is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
       <a class="reel-slide" href="case-linen.html" data-cursor="work" aria-label="Winning back Google in six months: view case study"><div class="art art-linen" aria-hidden="true"></div></a>
       <div class="reel-slide is-soon" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
@@ -109,7 +117,7 @@
 
   <!-- The puzzle: the centre piece is missing; scrolling lifts the rest away -->
   <section class="puzzle" aria-label="About">
-    <div class="puzzle-stage" data-cursor="puzzle">
+    <div class="puzzle-stage" data-cursor="puzzle" data-dark>
       <div class="puzzle-line">
         <p>Every brand is a <span class="gothic">puzzle.</span> I find the piece that’s missing.</p>
         <a class="btn" href="about.html">More about me <span class="arrow" aria-hidden="true">→</span></a>
@@ -131,7 +139,7 @@
   </section>
 </div>
 
-<script src="assets/js/hero.js"></script>
+<script src="assets/js/hero3d.js" defer></script>
 <script src="assets/vendor/gsap.min.js" defer></script>
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>
 <script src="assets/vendor/ScrollToPlugin.min.js" defer></script>

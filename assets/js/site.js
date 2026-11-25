@@ -43,24 +43,85 @@
       this.delay = d;
       return c;
     },
-    note: function (freq, t, len, vol) {
-      var c = this.ctx, o1 = c.createOscillator(), o2 = c.createOscillator(), f = c.createBiquadFilter(), g = c.createGain();
-      o1.type = 'sine'; o2.type = 'triangle'; o1.frequency.value = freq; o2.frequency.value = freq * 1.003;
-      f.type = 'lowpass'; f.frequency.setValueAtTime(500, t); f.frequency.linearRampToValueAtTime(1500, t + len * .4); f.frequency.linearRampToValueAtTime(600, t + len);
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + len * .35); g.gain.linearRampToValueAtTime(0, t + len);
-      o1.connect(f); o2.connect(f); f.connect(g); g.connect(this.master); g.connect(this.delay);
-      o1.start(t); o2.start(t); o1.stop(t + len + .1); o2.stop(t + len + .1);
+    /* A slow, warm loop at 84 bpm: electric-piano chords (FM synthesis),
+       a soft low bass, a quiet heartbeat kick, a swung shaker, vinyl crackle
+       and the odd bell note. Generated live, so there is no file to download. */
+    noiseBuf: function () {
+      if (this._nb) return this._nb;
+      var c = this.ctx, b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+      return (this._nb = b);
+    },
+    epiano: function (f, t, vol, len) {
+      var c = this.ctx, car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), g = c.createGain(), lp = c.createBiquadFilter();
+      car.frequency.value = f; mod.frequency.value = f; car.detune.value = (Math.random() - .5) * 8;
+      mg.gain.setValueAtTime(f * 1.4, t); mg.gain.exponentialRampToValueAtTime(f * .15, t + .6);
+      lp.type = 'lowpass'; lp.frequency.value = 2400;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(vol * .35, t + .5); g.gain.exponentialRampToValueAtTime(.0001, t + len);
+      mod.connect(mg).connect(car.frequency); car.connect(lp).connect(g); g.connect(this.master); g.connect(this.delay);
+      car.start(t); mod.start(t); car.stop(t + len + .05); mod.stop(t + len + .05);
+    },
+    bass: function (f, t, len) {
+      var c = this.ctx, o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine'; o.frequency.value = f;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + len);
+      o.connect(g).connect(this.master); o.start(t); o.stop(t + len + .05);
+    },
+    kick: function (t) {
+      var c = this.ctx, o = c.createOscillator(), g = c.createGain();
+      o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+      g.gain.setValueAtTime(.22, t); g.gain.exponentialRampToValueAtTime(.0001, t + .32);
+      o.connect(g).connect(this.master); o.start(t); o.stop(t + .35);
+    },
+    shaker: function (t, vol) {
+      var c = this.ctx, n = c.createBufferSource(), hp = c.createBiquadFilter(), g = c.createGain();
+      n.buffer = this.noiseBuf(); hp.type = 'highpass'; hp.frequency.value = 7200;
+      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + .05);
+      n.connect(hp).connect(g).connect(this.master); n.start(t, Math.random()); n.stop(t + .06);
+    },
+    bell: function (f, t) {
+      var c = this.ctx, g = c.createGain();
+      [1, 2.76, 5.4].forEach(function (m, i) {
+        var o = c.createOscillator(), og = c.createGain(); o.frequency.value = f * m;
+        og.gain.value = [1, .3, .12][i]; o.connect(og).connect(g); o.start(t); o.stop(t + 2.6);
+      });
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + 2.5);
+      g.connect(this.master); g.connect(this.delay);
+    },
+    crackle: function () {
+      var c = this.ctx, b = c.createBuffer(1, c.sampleRate * 3, c.sampleRate), d = b.getChannelData(0);
+      for (var i = 0; i < d.length; i++) d[i] = (Math.random() < .0006 ? (Math.random() * 2 - 1) * .6 : 0) + (Math.random() * 2 - 1) * .012;
+      var s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+      s.buffer = b; s.loop = true; bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = .6; g.gain.value = .35;
+      s.connect(bp).connect(g).connect(this.master); s.start();
+      this._crackle = s;
     },
     pad: function () {
-      var self = this, scale = [196, 220, 261.63, 293.66, 329.63, 392, 440, 523.25];
-      function chord() {
+      var self = this, c = this.ctx, beat = 60 / 84, eighth = beat / 2;
+      // Fmaj9 · Em7 · Dm9 · Cmaj9
+      var prog = [
+        { root: 87.31, notes: [174.61, 220, 261.63, 329.63, 392] },
+        { root: 82.41, notes: [164.81, 196, 246.94, 293.66] },
+        { root: 73.42, notes: [146.83, 174.61, 220, 261.63, 329.63] },
+        { root: 65.41, notes: [130.81, 164.81, 196, 246.94, 293.66] }
+      ];
+      var penta = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
+      if (!this._crackle) this.crackle();
+      var step = 0, next = c.currentTime + .1;
+      clearInterval(this.padTimer);
+      this.padTimer = setInterval(function () {
         if (!self.on) return;
-        var t = self.ctx.currentTime + .05, base = Math.floor(Math.random() * 4);
-        [0, 2, 4].forEach(function (s, i) { self.note(scale[(base + s) % scale.length] / (i === 0 ? 2 : 1), t + i * .25, 7.5, .05); });
-        if (Math.random() > .5) self.note(scale[5 + Math.floor(Math.random() * 3)], t + 2.2, 3, .025);
-        self.padTimer = setTimeout(chord, 4200 + Math.random() * 1600);
-      }
-      clearTimeout(this.padTimer); chord();
+        while (next < c.currentTime + .15) {
+          var bar = Math.floor(step / 8) % 4, s8 = step % 8, ch = prog[bar], swing = s8 % 2 ? eighth * .14 : 0, t = next + swing;
+          if (s8 === 0) { ch.notes.forEach(function (f, i) { self.epiano(f, t + i * .018, .045, beat * 3.6); }); self.bass(ch.root, t, beat * 1.6); self.kick(t); }
+          if (s8 === 3) ch.notes.slice(1, 4).forEach(function (f, i) { self.epiano(f, t + i * .012, .026, beat * 1.4); });
+          if (s8 === 4) self.kick(t);
+          if (s8 === 5) self.bass(ch.root, t, beat * .9);
+          self.shaker(t, s8 % 2 ? .02 : .009);
+          if (s8 === 6 && Math.random() < .45) self.bell(penta[Math.floor(Math.random() * penta.length)], t);
+          next += eighth; step++;
+        }
+      }, 25);
     },
     setOn: function (v) {
       this.on = v; store.set('sound', v ? 'on' : 'off');
@@ -68,11 +129,11 @@
         if (!this.init()) return;
         this.ctx.resume();
         this.master.gain.cancelScheduledValues(this.ctx.currentTime);
-        this.master.gain.linearRampToValueAtTime(.9, this.ctx.currentTime + 2.5);
+        this.master.gain.linearRampToValueAtTime(.85, this.ctx.currentTime + 3);
         this.pad();
       } else if (this.ctx) {
         this.master.gain.linearRampToValueAtTime(0, this.ctx.currentTime + .6);
-        clearTimeout(this.padTimer);
+        clearInterval(this.padTimer);
       }
       document.querySelectorAll('[data-sound]').forEach(function (b) {
         b.classList.toggle('is-on', v); b.setAttribute('aria-pressed', v ? 'true' : 'false');
@@ -111,11 +172,18 @@
         '<button class="pill menu-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu">Menu</button>' +
       '</div>';
     body.insertBefore(n, body.firstChild);
-    if (!isHome) return;
-    // On the homepage the pills wait at the bottom of the hero, then rise to the top
+    // pills switch to a dark-glass look whenever a dark section sits behind them
     var ticking = false;
-    function check() { ticking = false; n.classList.toggle('at-bottom', scrollY < innerHeight * .4); }
+    function check() {
+      ticking = false;
+      if (isHome) n.classList.toggle('at-bottom', scrollY < innerHeight * .4);
+      var y = n.getBoundingClientRect().top + 20, dark = false;
+      document.querySelectorAll('[data-dark]').forEach(function (el) { var r = el.getBoundingClientRect(); if (r.top <= y && r.bottom >= y && r.height) dark = true; });
+      n.classList.toggle('on-dark', dark);
+    }
     addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(check); } }, { passive: true });
+    addEventListener('resize', check);
+    setTimeout(check, 50); setTimeout(check, 1300);   // again once the nav has settled into place
   }
 
   function buildMenu() {
@@ -250,26 +318,34 @@
     var tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), window.SJ.heroReady || Promise.resolve(),
       new Promise(function (r) { if (document.readyState === 'complete') r(); else addEventListener('load', r); }),
       new Promise(function (r) { setTimeout(r, 3000); })];
-    var target = 0, shown = 0, ready = false, t0 = performance.now(), lastFlick = 0;
+    var target = 0, shown = 0, ready = false, entering = false, t0 = performance.now(), lastFlick = 0;
     tasks.forEach(function (p) { p.then(function () { target += 100 / tasks.length; }); });
-    function fw(p) { var h = frame.offsetHeight; return Math.max(2, h * .8 * p); }
+    function fw(p) { var h = frame.offsetHeight; return Math.max(2, h * .78 * p); }
+    // the textures keep flicking (slower once loaded) until you enter
+    (function flick(now) {
+      if (entering) return;
+      if (now - lastFlick > (ready ? 260 : 140) && shown > 4) { lastFlick = now; slides.forEach(function (s) { s.classList.remove('on'); }); slides[k++ % slides.length].classList.add('on'); }
+      requestAnimationFrame(flick);
+    })(t0);
+    var prevT = t0;
     (function tick(now) {
+      var dt = Math.min(.25, (now - prevT) / 1000); prevT = now;   // time-based, so slow devices don't crawl
       var limit = Math.min(target, (now - t0) / 30);
-      shown += (limit - shown) * .08; if (limit - shown < .6) shown = limit;
+      shown += (limit - shown) * (1 - Math.exp(-dt * 6)); if (limit - shown < .6) shown = limit;
       frame.style.setProperty('--fw', fw(shown / 100) + 'px');
-      if (now - lastFlick > 150 && shown > 4) { lastFlick = now; slides.forEach(function (s) { s.classList.remove('on'); }); slides[k++ % slides.length].classList.add('on'); }
       if (shown >= 100) { finish(); return; }
       requestAnimationFrame(tick);
     })(t0);
     function finish() {
-      // last frame: clear, so the hero's sunflower shows through
-      slides.forEach(function (s) { s.classList.remove('on'); });
       scrambleTo(status, '( LOADED )');
-      setTimeout(function () { ready = true; el.classList.add('is-ready'); el.querySelector('.loader-go').focus({ preventScroll: true }); }, 700);
+      setTimeout(function () { ready = true; el.classList.add('is-ready'); el.querySelector('.loader-go').focus({ preventScroll: true }); }, 900);
     }
-    el.addEventListener('pointermove', function (e) { hint.style.transform = 'translate(' + (e.clientX + 18) + 'px,' + (e.clientY + 18) + 'px)'; });
+    // "Click to enter with sound" sits just under the pointer
+    el.addEventListener('pointermove', function (e) { hint.style.transform = 'translate(-50%,0) translate(' + e.clientX + 'px,' + (e.clientY + 26) + 'px)'; el.classList.add('has-pointer'); });
     function enter(sound) {
-      if (!ready || el.classList.contains('is-entering')) return;
+      if (!ready || entering) return;
+      entering = true;
+      slides.forEach(function (s) { s.style.transition = 'opacity .9s'; s.classList.remove('on'); });
       Sound.setOn(sound);
       store.sset('entered', '1');
       el.classList.add('is-entering');
@@ -334,6 +410,18 @@
   }
 
   /* ------------------------------------------------------------------ Small behaviours */
+  function scrl() {
+    var el = document.querySelector('.scrl .g'); if (!el || reduced) return;
+    var words = ['s cr l', 'scroll'], i = 0;
+    function swap() { i = 1 - i; scrambleTo(el, words[i]); }
+    setInterval(swap, 2600);
+    var near = false;
+    addEventListener('pointermove', function (e) {
+      var r = el.getBoundingClientRect(), d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      if (d < 120 && !near) { near = true; swap(); } else if (d > 160) near = false;
+    }, { passive: true });
+  }
+
   function copyEmail() {
     document.querySelectorAll('[data-copy-email]').forEach(function (b) {
       b.addEventListener('click', function () {
@@ -359,6 +447,7 @@
   buildCursor();
   anchors();
   pageTransition();
+  scrl();
   copyEmail();
   document.querySelectorAll('[data-sound]').forEach(function (b) { b.addEventListener('click', function () { Sound.setOn(!Sound.on); }); });
 
