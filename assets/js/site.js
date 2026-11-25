@@ -105,7 +105,7 @@
     n.className = 'nav' + (isHome && scrollY < innerHeight * .4 ? ' at-bottom' : '');
     n.setAttribute('aria-label', 'Main');
     n.innerHTML =
-      '<div><a class="pill mono" href="index.html" aria-label="Sejal Jain, home">sj</a>' + LINKS.slice(0, 2).map(link).join('') + '</div>' +
+      '<div>' + LINKS.slice(0, 2).map(link).join('') + '</div>' +
       '<div>' + LINKS.slice(2).map(link).join('') +
         '<button class="pill round" type="button" data-sound aria-pressed="false" aria-label="Turn sound on"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span></button>' +
         '<button class="pill menu-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu">Menu</button>' +
@@ -122,7 +122,7 @@
     var m = document.createElement('div');
     m.className = 'menu'; m.id = 'menu'; m.setAttribute('role', 'dialog'); m.setAttribute('aria-modal', 'true'); m.setAttribute('aria-label', 'Menu');
     m.innerHTML =
-      '<div class="menu-top"><a class="pill mono" href="index.html" aria-label="Home">sj</a><button class="pill" type="button" data-menu-close>Close</button></div>' +
+      '<div class="menu-top"><span></span><button class="pill" type="button" data-menu-close>Close</button></div>' +
       '<ul>' + LINKS.map(function (l) { return '<li><a href="' + l.href + '"' + (l.key === page ? ' aria-current="page"' : '') + '>' + l.label + '</a></li>'; }).join('') + '</ul>' +
       '<div class="menu-foot"><a href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram ↗</a><a href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a href="mailto:' + EMAIL + '">Email ↗</a></div>';
     body.appendChild(m);
@@ -226,123 +226,112 @@
     window.SJ.scrollToId = go;
   }
 
-  /* ------------------------------------------------------------------ Loader and welcome (home, once a visit)
-     Cream screen counting assets, a flip to black, texture cards flying in,
-     then a sunflower and two ways in. */
+  /* ------------------------------------------------------------------ Loader (home, once a visit)
+     Black screen, a small frame between brackets that widens as things load
+     while images flick through it. Once loaded: click anywhere to dive in with
+     sound, or "Enter without sound" at the bottom. The frame then opens out
+     to full screen onto the hero. */
+  function scrambleTo(el, text) {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', from = el.textContent, n = 0, total = 16;
+    (function step() {
+      var out = '';
+      for (var i = 0; i < text.length; i++) out += (n > total * (i + 1) / text.length || text[i] === ' ' || text[i] === '(' || text[i] === ')') ? text[i] : chars[Math.floor(Math.random() * chars.length)];
+      el.textContent = out;
+      if (++n <= total) requestAnimationFrame(step); else el.textContent = text;
+    })();
+  }
   function runLoader(done) {
     var el = document.querySelector('.loader');
     if (!el) { done(); return; }
     if (store.sget('entered') || reduced) { el.remove(); done(); return; }
-    body.style.overflow = 'hidden';
-    var count = el.querySelector('.loader-count b'), stack = el.querySelector('.loader-stack');
-    var cards = [].slice.call(stack.children), flipped = false, flown = 0;
+    body.style.overflow = 'hidden'; scrollTo(0, 0);
+    var frame = el.querySelector('.loader-frame'), status = el.querySelector('.loader-status'), hint = el.querySelector('.loader-hint');
+    var slides = [].slice.call(el.querySelectorAll('.loader-hole i')), k = 0, flick = 0;
     var tasks = [document.fonts ? document.fonts.ready : Promise.resolve(), window.SJ.heroReady || Promise.resolve(),
       new Promise(function (r) { if (document.readyState === 'complete') r(); else addEventListener('load', r); }),
-      new Promise(function (r) { setTimeout(r, 3600); })];
-    var target = 0, shown = 0, finished = false, t0 = performance.now();
+      new Promise(function (r) { setTimeout(r, 3000); })];
+    var target = 0, shown = 0, ready = false, t0 = performance.now(), lastFlick = 0;
     tasks.forEach(function (p) { p.then(function () { target += 100 / tasks.length; }); });
-    (function tick() {
-      // the counter never runs ahead of a slow, steady pace, so the sequence is always seen
-      var limit = Math.min(target, (performance.now() - t0) / 36);
+    function fw(p) { var h = frame.offsetHeight; return Math.max(2, h * .8 * p); }
+    (function tick(now) {
+      var limit = Math.min(target, (now - t0) / 30);
       shown += (limit - shown) * .08; if (limit - shown < .6) shown = limit;
-      var v = Math.min(100, Math.floor(shown));
-      count.textContent = (v < 10 ? '0' : '') + v;
-      if (v >= 22 && !flipped) { flipped = true; el.classList.add('is-dark'); }
-      if (flipped) { var want = Math.min(cards.length, Math.floor((v - 26) / 11) + 1); while (flown < want) fly(cards[flown], flown++); }
-      if (v >= 100 && !finished) { finished = true; setTimeout(welcome, 700); return; }
+      frame.style.setProperty('--fw', fw(shown / 100) + 'px');
+      if (now - lastFlick > 150 && shown > 4) { lastFlick = now; slides.forEach(function (s) { s.classList.remove('on'); }); slides[k++ % slides.length].classList.add('on'); }
+      if (shown >= 100) { finish(); return; }
       requestAnimationFrame(tick);
-    })();
-    function fly(card, i) {
-      var rot = (i % 2 ? 1 : -1) * (3 + i * 1.6), ox = (i - (cards.length - 1) / 2) * 14, oy = -i * 6;
-      card.style.transitionDelay = '0s';
-      requestAnimationFrame(function () {
-        card.classList.add('in');
-        card.style.transform = 'translate(-50%,-50%) translate(' + ox + 'px,' + oy + 'px) rotate(' + rot + 'deg)';
-      });
+    })(t0);
+    function finish() {
+      // last frame: clear, so the hero's sunflower shows through
+      slides.forEach(function (s) { s.classList.remove('on'); });
+      scrambleTo(status, '( LOADED )');
+      setTimeout(function () { ready = true; el.classList.add('is-ready'); el.querySelector('.loader-go').focus({ preventScroll: true }); }, 700);
     }
-    function welcome() {
-      cards.forEach(function (c, i) {
-        c.style.transition = 'transform 1.3s cubic-bezier(.7,0,.84,0) ' + i * .05 + 's, opacity .9s ease ' + (.3 + i * .05) + 's';
-        c.style.transform = 'translate(-50%,-50%) translate(' + ((i - 2.5) * 22) + 'vw, -80vh) rotate(' + ((i - 2.5) * 14) + 'deg)';
-        c.style.opacity = '0';
-      });
-      el.classList.add('is-welcome');
-      if (window.SJ.sunflower) window.SJ.sunflower(el.querySelector('.welcome canvas'));
-      setTimeout(function () { var b = el.querySelector('[data-enter]'); if (b) b.focus({ preventScroll: true }); }, 900);
-    }
-    el.addEventListener('click', function (e) {
-      var b = e.target.closest('[data-enter]'); if (!b) return;
-      Sound.setOn(b.getAttribute('data-enter') === 'sound');
+    el.addEventListener('pointermove', function (e) { hint.style.transform = 'translate(' + (e.clientX + 18) + 'px,' + (e.clientY + 18) + 'px)'; });
+    function enter(sound) {
+      if (!ready || el.classList.contains('is-entering')) return;
+      Sound.setOn(sound);
       store.sset('entered', '1');
-      el.classList.add('is-leaving');
+      el.classList.add('is-entering');
       body.style.overflow = '';
       done();
-      setTimeout(function () { if (window.SJ.sunflowerStop) window.SJ.sunflowerStop(); el.remove(); }, 1500);
-    });
+      setTimeout(function () { el.remove(); }, 1600);
+    }
+    el.querySelector('.loader-skip').addEventListener('click', function (e) { e.stopPropagation(); enter(false); });
+    el.addEventListener('click', function () { enter(true); });
   }
 
-  /* ------------------------------------------------------------------ Sunflower for the welcome screen
-     Golden-angle seeds and two rings of petals, drawn in 2D with a little
-     perspective so the head leans toward the pointer, the way sunflowers turn to light. */
-  window.SJ.sunflower = function (cv) {
-    if (!cv) return;
-    var ctx = cv.getContext('2d'), raf = 0, start = performance.now(), mx = .5, my = .3, tx = 0, ty = 0, W, H, D;
-    function size() { D = Math.min(devicePixelRatio || 1, 2); W = cv.clientWidth; H = cv.clientHeight; cv.width = W * D; cv.height = H * D; ctx.setTransform(D, 0, 0, D, 0, 0); }
-    size(); addEventListener('resize', size);
-    cv.parentNode.addEventListener('pointermove', function (e) { mx = e.clientX / W; my = e.clientY / H; });
-    var GA = Math.PI * (3 - Math.sqrt(5)), SEEDS = 420, PET = 26;
-    var petals = []; for (var i = 0; i < PET * 2; i++) petals.push({ a: (i % PET) / PET * Math.PI * 2 + (i >= PET ? Math.PI / PET : 0), l: (i >= PET ? 1 : .86) * (.92 + Math.random() * .16), w: .2 + Math.random() * .05, back: i < PET });
-    function proj(x, y, z, cxp, cyp, R) {
-      // rotate around Y (tx) then X (ty), then a soft perspective
-      var cy = Math.cos(tx), sy = Math.sin(tx), cxr = Math.cos(ty), sx = Math.sin(ty);
-      var x1 = x * cy + z * sy, z1 = -x * sy + z * cy;
-      var y1 = y * cxr - z1 * sx, z2 = y * sx + z1 * cxr;
-      var p = 3.2 / (3.2 - z2);
-      return [cxp + x1 * R * p, cyp + y1 * R * p];
+  /* ------------------------------------------------------------------ Page transition (Supersolid style)
+     An arched dark sheet with a glowing pink-violet rim rises over the page;
+     the next page opens under it and the sheet carries on up and away. */
+  function pageTransition() {
+    var wrap = document.createElement('div');
+    wrap.className = 'pt'; wrap.setAttribute('aria-hidden', 'true');
+    wrap.innerHTML = '<svg viewBox="0 0 100 100" preserveAspectRatio="none"><defs><linearGradient id="ptg" x1="0" x2="1"><stop offset="0" stop-color="#6E3BFF"/><stop offset=".5" stop-color="#FF0592"/><stop offset="1" stop-color="#6E3BFF"/></linearGradient></defs><path class="sheet"/><path class="rim"/></svg>';
+    body.appendChild(wrap);
+    var sheet = wrap.querySelector('.sheet'), rim = wrap.querySelector('.rim');
+    function ease(t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+    function run(ms, draw, cb) {
+      var s = performance.now();
+      (function f(now) { var t = Math.min(1, (now - s) / ms); draw(ease(t)); if (t < 1) requestAnimationFrame(f); else if (cb) cb(); })(s);
     }
-    function draw(now) {
-      var t = Math.min(1, (now - start) / 2600), e = 1 - Math.pow(1 - t, 3), time = now / 1000;
-      tx += (((mx - .5) * .9) - tx) * .05; ty += (((my - .35) * -.7) - ty) * .05;
-      var R = Math.min(W, H) * .12 * (.4 + .6 * e), cxp = W / 2, cyp = H * .32;
-      ctx.clearRect(0, 0, W, H);
-      // light it leans toward
-      var g = ctx.createRadialGradient(cxp + tx * 220, cyp - ty * 160, 0, cxp, cyp, R * 4);
-      g.addColorStop(0, 'rgba(245,240,230,.10)'); g.addColorStop(1, 'rgba(245,240,230,0)');
-      ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-      // petals: back ring first
-      petals.forEach(function (p, i) {
-        var grow = Math.max(0, Math.min(1, e * 1.6 - (p.back ? 0 : .25) - (i % PET) / PET * .3));
-        if (!grow) return;
-        var a = p.a + Math.sin(time * .6 + i) * .015, L = (1 + p.l * 1.25 * grow), w = p.w;
-        var ca = Math.cos(a), sa = Math.sin(a), curl = .18 * grow;
-        var base = proj(ca * .9, sa * .9, 0, cxp, cyp, R);
-        var tip = proj(ca * L, sa * L, -curl * (p.back ? 1.4 : 1), cxp, cyp, R);
-        var l1 = proj(ca * (1 + (L - 1) * .5) - sa * w, sa * (1 + (L - 1) * .5) + ca * w, -curl * .4, cxp, cyp, R);
-        var r1 = proj(ca * (1 + (L - 1) * .5) + sa * w, sa * (1 + (L - 1) * .5) - ca * w, -curl * .4, cxp, cyp, R);
-        ctx.beginPath(); ctx.moveTo(base[0], base[1]);
-        ctx.quadraticCurveTo(l1[0], l1[1], tip[0], tip[1]);
-        ctx.quadraticCurveTo(r1[0], r1[1], base[0], base[1]);
-        ctx.fillStyle = p.back ? '#D9CFBE' : '#F5F0E6';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(18,16,17,.25)'; ctx.lineWidth = .8; ctx.stroke();
-      });
-      // seed head: golden angle spiral
-      var head = proj(0, 0, .05, cxp, cyp, R);
-      ctx.beginPath(); ctx.ellipse(head[0], head[1], R * .98 * Math.cos(tx * .9), R * .98 * Math.cos(ty * .9), 0, 0, Math.PI * 2);
-      ctx.fillStyle = '#1E1718'; ctx.fill();
-      var n = Math.floor(SEEDS * Math.min(1, e * 1.3));
-      for (var k = 1; k < n; k++) {
-        var rr = Math.sqrt(k / SEEDS) * .92, aa = k * GA;
-        var s = proj(Math.cos(aa) * rr, Math.sin(aa) * rr, .08 * (1 - rr * rr), cxp, cyp, R);
-        var pink = k % 23 === 0;
-        ctx.beginPath(); ctx.arc(s[0], s[1], R * (pink ? .03 : .022) * (.6 + rr * .6), 0, Math.PI * 2);
-        ctx.fillStyle = pink ? '#FF0592' : (k % 3 ? '#4A3A33' : '#6B5548'); ctx.fill();
+    function cover(cb) {   // sheet rises from the bottom, top edge arched
+      wrap.classList.add('is-on');
+      run(900, function (e) {
+        var y = 100 - 112 * e, c = 22 * Math.sin(Math.PI * Math.min(1, e * 1.1));
+        sheet.setAttribute('d', 'M0 100 L0 ' + y + ' Q50 ' + (y - c) + ' 100 ' + y + ' L100 100 Z');
+        rim.setAttribute('d', 'M0 ' + y + ' Q50 ' + (y - c) + ' 100 ' + y);
+      }, cb);
+    }
+    function reveal() {    // sheet carries on up, bottom edge curving, uncovering the new page
+      wrap.classList.add('is-on'); root.classList.remove('pt-in');
+      run(1200, function (e) {
+        var y = 100 - 112 * e, c = 22 * Math.sin(Math.PI * Math.min(1, e * 1.05));
+        sheet.setAttribute('d', 'M0 -5 L100 -5 L100 ' + y + ' Q50 ' + (y + c) + ' 0 ' + y + ' Z');
+        rim.setAttribute('d', 'M100 ' + y + ' Q50 ' + (y + c) + ' 0 ' + y);
+      }, function () { wrap.classList.remove('is-on'); });
+    }
+    if (root.classList.contains('pt-in')) {
+      try { sessionStorage.removeItem('sj.pt'); } catch (e) {}
+      if (reduced) root.classList.remove('pt-in'); else setTimeout(reveal, 120);
+    }
+    addEventListener('pageshow', function (e) { if (e.persisted) { wrap.classList.remove('is-on'); root.classList.remove('pt-in'); } });
+    document.addEventListener('click', function (e) {
+      var a = e.target.closest('a[href]');
+      if (!a || e.defaultPrevented || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || a.target === '_blank' || a.hasAttribute('download')) return;
+      var url = new URL(a.href, location.href);
+      if (url.origin !== location.origin || !/\.html$|\/$/.test(url.pathname)) return;
+      if (url.pathname === location.pathname) {   // same page: anchors handle hashes; a plain link glides to the top
+        if (!url.hash) { e.preventDefault(); if (window.gsap && window.ScrollToPlugin) gsap.to(window, { scrollTo: 0, duration: 1.4, ease: 'power3.inOut' }); else scrollTo({ top: 0, behavior: 'smooth' }); }
+        return;
       }
-      raf = requestAnimationFrame(draw);
-    }
-    raf = requestAnimationFrame(draw);
-    window.SJ.sunflowerStop = function () { cancelAnimationFrame(raf); };
-  };
+      if (reduced) return;
+      e.preventDefault();
+      try { sessionStorage.setItem('sj.pt', '1'); } catch (err) {}
+      Sound.tick(true);
+      cover(function () { location.href = url.href; });
+    });
+  }
 
   /* ------------------------------------------------------------------ Small behaviours */
   function copyEmail() {
@@ -369,6 +358,7 @@
   buildFooter();
   buildCursor();
   anchors();
+  pageTransition();
   copyEmail();
   document.querySelectorAll('[data-sound]').forEach(function (b) { b.addEventListener('click', function () { Sound.setOn(!Sound.on); }); });
 

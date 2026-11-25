@@ -11,24 +11,23 @@
 <link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fonts/UnifrakturMaguntia.ttf" as="font" type="font/ttf" crossorigin>
 <link rel="stylesheet" href="assets/css/main.css">
+<script>try{if(sessionStorage.getItem("sj.pt"))document.documentElement.classList.add("pt-in")}catch(e){}</script>
 </head>
 <body data-page="home">
 
-<!-- Loader and welcome: first visit in a session only -->
+<!-- Loader: first visit in a session only -->
 <div class="loader" role="dialog" aria-modal="true" aria-label="Welcome">
-  <div class="loader-flip" aria-hidden="true"></div>
-  <div class="loader-stack" aria-hidden="true"><i class="tx2"></i><i class="tx1"></i><i class="tx6"></i><i class="tx3"></i><i class="tx4"></i><i class="tx5"></i></div>
-  <p class="loader-count">Loading assets <b>00</b>/100</p>
-  <div class="welcome">
-    <canvas aria-hidden="true"></canvas>
-    <div class="welcome-inner">
-      <h2>Welcome aboard</h2>
-      <div class="row">
-        <button class="pill primary" type="button" data-enter="sound">Dive into the experience</button>
-        <button class="pill" type="button" data-enter="quiet">Enter without audio</button>
-      </div>
-    </div>
+  <div class="loader-frame">
+    <span class="loader-br l" aria-hidden="true">(</span>
+    <div class="loader-hole" aria-hidden="true"><i class="tx2"></i><i class="art art-blog"></i><i class="tx3"></i><i class="tx7">Sejal</i><i class="tx1"></i><i class="art art-linen"></i><i class="tx6"></i><i class="tx4"></i><i class="art art-lantana"></i><i class="tx5"></i></div>
+    <span class="loader-br r" aria-hidden="true">)</span>
   </div>
+  <p class="loader-title">Welcome aboard</p>
+  <p class="loader-tap">Tap anywhere to dive in, with sound</p>
+  <button class="loader-go" type="button" aria-label="Dive into the experience, with sound"></button>
+  <span class="loader-hint" aria-hidden="true">Click anywhere to dive in, with sound</span>
+  <p class="loader-status" aria-live="polite">( LOADING )</p>
+  <button class="loader-skip" type="button">Enter without sound</button>
 </div>
 
 <div class="page">
@@ -38,7 +37,6 @@
     <div class="hero-fallback" aria-hidden="true"></div>
     <canvas id="paint" aria-hidden="true"></canvas>
     <h1 class="hero-name">Sejal Jain</h1>
-    <div class="hero-hit" aria-hidden="true"></div>
     <span class="scrl" aria-hidden="true">SCRL</span>
   </header>
 
@@ -46,19 +44,17 @@
   <section class="section wrap intro">
     <p class="label reveal">Hello, I’m Sejal</p>
     <p class="reveal">A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
-    <div class="num-ctas reveal" style="justify-content:center">
-      <a class="btn" href="#work">See selected work <span class="arrow" aria-hidden="true">↓</span></a>
-      <a class="btn btn--line" href="about.html">About me</a>
-    </div>
   </section>
 
-  <!-- Selected work: one wide image at a time, three titles with timers -->
-  <section id="work" aria-label="Selected work">
-    <div class="wrap sec-head"><h2>Selected work</h2><a class="label" href="work.html">View all work <span class="arrow" aria-hidden="true">→</span></a></div>
-    <div class="reel" data-reel style="margin-top:16px">
+  <!-- Selected work: a full-viewport image, then the three titles with timers on a rounded sheet -->
+  <section id="work" class="work-reel" aria-label="Selected work" data-reel>
+    <div class="reel">
       <a class="reel-slide is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
       <a class="reel-slide" href="case-linen.html" data-cursor="work" aria-label="Winning back Google in six months: view case study"><div class="art art-linen" aria-hidden="true"></div></a>
       <div class="reel-slide is-soon" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
+    </div>
+    <div class="reel-sheet wrap">
+      <div class="reel-head"><span class="label">Selected work</span><a class="label" href="work.html">View all work <span class="arrow" aria-hidden="true">→</span></a></div>
       <div class="reel-titles">
         <button class="reel-title is-on" type="button"><i></i><b>Rebuilt, not repainted</b><span>B2B SaaS · Design systems · Content design</span></button>
         <button class="reel-title" type="button"><i></i><b>Winning back Google</b><span>D2C home linen · Brand voice · Search</span></button>
