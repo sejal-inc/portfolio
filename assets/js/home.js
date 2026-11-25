@@ -91,12 +91,13 @@
     });
     var words = wrap.querySelectorAll('.rise-w > span');
     gsap.set(words, { yPercent: 115 });
-    var tl = gsap.timeline({ scrollTrigger: { trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: .8,
-      onUpdate: function (st) { if (window.SJ.heroScroll) window.SJ.heroScroll(Math.min(1, st.progress / .62)); } } });
-    tl.to('.hero .scrl', { y: -30, opacity: 0, duration: .12, ease: 'power1.in' }, 0)
-      .to('.hero', { yPercent: -100, duration: .55, ease: 'power2.in' }, .04)
-      .to(words, { yPercent: 0, duration: .32, stagger: .012, ease: 'power3.out' }, .44)
-      .to({}, { duration: .12 });
+    var proxy = { p: 0 };
+    var tl = gsap.timeline({ scrollTrigger: { trigger: wrap, start: 'top top', end: 'bottom bottom', scrub: .8 } });
+    tl.to('.hero .scrl', { y: -30, opacity: 0, duration: .1, ease: 'power1.in' }, 0)
+      .to(proxy, { p: 1, duration: .5, ease: 'none', onUpdate: function () { if (window.SJ.heroScroll) window.SJ.heroScroll(proxy.p); } }, .02)
+      .to('.hero', { autoAlpha: 0, duration: .06, ease: 'none' }, .5)          // fully drained to white: let the cream stage show
+      .to(words, { yPercent: 0, duration: .3, stagger: .012, ease: 'power3.out' }, .52)
+      .to({}, { duration: .1 });
   }
 
   function init() {
