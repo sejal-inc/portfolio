@@ -6,7 +6,6 @@
    ========================================================================== */
 
 @font-face { font-family: "Geist"; src: url("../fonts/Geist.woff") format("woff"); font-weight: 100 900; font-display: swap; }
-@font-face { font-family: "Archivo"; src: url("../fonts/Archivo-wdth.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
 @font-face { font-family: "Unifraktur"; src: url("../fonts/UnifrakturMaguntia.ttf") format("truetype"); font-weight: 400; font-display: swap; }
 
 :root {
@@ -22,7 +21,6 @@
   --line-dark: rgba(245, 240, 230, .16);
 
   --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --wide: "Archivo", "Geist", ui-sans-serif, system-ui, sans-serif;
   --gothic: "Unifraktur", "Old English Text MT", Georgia, serif;
 
   --gutter: max(20px, min(3.2vw, 48px));
@@ -127,9 +125,9 @@ a:hover .arrow, button:hover .arrow { transform: translateX(4px); }
    a pink puzzle piece in the puzzle section. */
 .has-cursor, .has-cursor * { cursor: none !important; }
 .cursor { position: fixed; left: 0; top: 0; z-index: 1000; pointer-events: none; }
-.cursor .ring { position: absolute; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px #fff; mix-blend-mode: difference; transition: transform .45s var(--ease-out), opacity .25s; }
-.cursor.is-link .ring { transform: scale(2); }
-.cursor.is-lens .ring { transform: scale(4.8); mix-blend-mode: normal; box-shadow: inset 0 0 0 .6px var(--ink); }
+.cursor .ring { position: absolute; width: 9px; height: 9px; margin: -4.5px 0 0 -4.5px; border-radius: 50%; box-shadow: inset 0 0 0 .75px #fff; mix-blend-mode: difference; transition: transform .45s var(--ease-out), opacity .25s; }
+.cursor.is-link .ring { transform: scale(2.4); }
+.cursor.is-lens .ring { transform: scale(7.4); mix-blend-mode: normal; box-shadow: inset 0 0 0 .15px var(--ink); }
 .cursor.is-down .ring { transform: scale(.8); }
 .cursor .work { position: absolute; left: 0; top: 0; transform: translate(-50%, -50%) scale(.3); opacity: 0; height: 48px; padding: 0 20px 0 14px; border-radius: var(--r-pill); display: inline-flex; align-items: center; gap: 10px; white-space: nowrap; background: var(--cream); color: var(--ink); font-size: 14px; font-weight: 450; transition: transform .5s var(--ease-out), opacity .25s; }
 .cursor .work svg { width: 20px; height: 20px; flex: none; max-width: none; color: var(--pink); }
@@ -149,6 +147,7 @@ a:hover .arrow, button:hover .arrow { transform: translateX(4px); }
 .loader { position: fixed; inset: 0; z-index: 900; color: var(--cream); cursor: none; }
 .loader-frame { position: absolute; left: 50%; top: 50%; width: var(--fw, 2px); height: var(--fh, 19svh); transform: translate(-50%, -50%); transition: width .8s var(--ease-out); }
 .loader-hole { position: absolute; inset: 0; overflow: hidden; box-shadow: 0 0 0 300vmax #0b0a0a; }
+.loader-frame::after { content: ""; position: absolute; inset: -1px; border: 2px solid #0b0a0a; pointer-events: none; }
 .loader-hole i { position: absolute; inset: 0; opacity: 0; background: center / cover no-repeat; }
 .loader-hole i.on { opacity: 1; }
 .loader-br { position: absolute; z-index: 2; top: 50%; transform: translateY(-50%); font: 400 13px/1 ui-monospace, "SF Mono", Menlo, monospace; color: rgba(245, 240, 230, .5); transition: opacity .6s; }
@@ -181,22 +180,22 @@ a:hover .arrow, button:hover .arrow { transform: translateX(4px); }
 body:not(.rays-on) .rays { opacity: 0; }
 .hero, .intro { position: relative; z-index: 1; }
 .hero { height: 100svh; min-height: 520px; display: grid; align-items: center; color: var(--cream); overflow: hidden; }
-.wordmark { margin: 0; padding: 0 var(--gutter); font-family: var(--wide); font-weight: 800; font-stretch: 125%; letter-spacing: -0.02em; line-height: .8; text-transform: uppercase; white-space: nowrap; color: var(--cream); font-size: 12vw; max-width: 100%; overflow: hidden; }
+.wordmark { margin: 0; padding: 0 var(--gutter); font-family: var(--sans); font-weight: 200; letter-spacing: -0.055em; line-height: .9; white-space: nowrap; color: var(--cream); font-size: 12vw; max-width: 100%; overflow: hidden; }
 .wordmark span { display: inline-block; transform-origin: left center; }
 .scrl { position: absolute; left: 50%; bottom: 30px; z-index: 3; transform: translateX(-50%); font: 400 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--cream); white-space: pre; transition: opacity .5s; }
 .scrl .g { color: rgba(245, 240, 230, .6); }
-.intro { display: grid; justify-items: start; gap: 28px; padding-top: 22svh; padding-bottom: 30svh; color: var(--cream); transition: color .7s var(--ease); }
+.intro { display: grid; justify-items: center; text-align: center; gap: 28px; padding-top: 22svh; padding-bottom: 30svh; color: var(--cream); transition: color .7s var(--ease); }
 body:not(.rays-on) .intro { color: var(--ink); }
-.intro-head { margin: 0; font-family: var(--wide); font-weight: 700; font-stretch: 125%; letter-spacing: -0.02em; line-height: 1; font-size: clamp(34px, 5.2vw, 84px); max-width: 16ch; text-wrap: balance; }
-.intro-text { margin: 0; font-size: clamp(20px, 2.1vw, 32px); font-weight: 350; letter-spacing: -0.02em; line-height: 1.28; max-width: 34ch; }
+.intro-head { margin: 0; font-weight: 250; letter-spacing: -0.05em; line-height: 1; font-size: clamp(40px, 6vw, 96px); max-width: 14ch; text-wrap: balance; }
+.intro-text { margin: 0; font-size: clamp(19px, 1.9vw, 28px); font-weight: 300; letter-spacing: -0.02em; line-height: 1.28; max-width: 34ch; }
 /* the rest of the page sits on cream above the rays */
 body[data-page="home"] .page { background: var(--cream); }
 body[data-page="home"] .page > :not(.rays):not(.hero):not(.intro) { position: relative; z-index: 1; }
 /* the small name that replaces SCRL at the top once the big one has gone */
-.nav-mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: auto; font-family: var(--wide); font-weight: 800; font-stretch: 125%; text-transform: uppercase; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); opacity: 0; transition: opacity .5s var(--ease), color .45s var(--ease); white-space: nowrap; }
+.nav-mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: auto; font-weight: 350; font-size: 16px; letter-spacing: -0.03em; color: var(--ink); opacity: 0; transition: opacity .5s var(--ease), color .45s var(--ease); white-space: nowrap; }
 .nav.show-mark .nav-mark { opacity: 1; }
 .nav.on-dark .nav-mark { color: var(--cream); }
-@media (max-width: 640px) { .nav-mark { font-size: 12px; } }
+@media (max-width: 640px) { .nav-mark { font-size: 14px; } }
 
 /* ---------------------------------------------------------------- Sections */
 .section { padding-top: clamp(88px, 11vw, 168px); padding-bottom: clamp(88px, 11vw, 168px); }

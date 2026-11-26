@@ -1,6 +1,7 @@
-/* Home background: soft colour rays streaming out from a bright centre, in the
-   brand's pink, green and yellow with a little black and cream (after Ragged Edge's
-   hero). It stays fixed behind the hero and intro, eases its centre toward the
+/* Home background: colour rays rushing out from a bright centre, as if you were
+   moving forward through them (after Ragged Edge's hero). One or two brand colours
+   at a time (pink, cream, green, yellow, deep pink, ink) take turns coming
+   through. It stays fixed behind the hero and intro, eases its centre toward the
    pointer, and fades out once the intro reaches the middle of the screen.
    Raw WebGL, no library; reduced resolution; paused when hidden. */
 (function () {
@@ -22,28 +23,32 @@
     ' return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),',
     '            mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}',
     'float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return v;}',
-    // palette: black, deep green, green, yellow, cream, pink, deep pink
+    // palette, in the order colours arrive: ink, pink, cream, green, yellow, deep pink.
+    // Each colour holds for a while, then hands over, so only one or two are ever on screen.
     'vec3 pal(float v){',
-    ' vec3 k0=vec3(.05,.06,.05),k1=vec3(.1,.3,.19),k2=vec3(.32,.56,.36),k3=vec3(.93,.78,.3),k4=vec3(.95,.92,.84),k5=vec3(.93,.25,.6),k6=vec3(.2,.18,.12);',
-    ' v=fract(v);',
-    ' vec3 c=mix(k0,k1,smoothstep(.0,.12,v));c=mix(c,k2,smoothstep(.12,.3,v));c=mix(c,k3,smoothstep(.3,.48,v));',
-    ' c=mix(c,k4,smoothstep(.48,.62,v));c=mix(c,k5,smoothstep(.66,.76,v));c=mix(c,k6,smoothstep(.8,.9,v));c=mix(c,k0,smoothstep(.9,1.,v));',
-    ' return c;}',
+    ' v=fract(v)*6.;float i=floor(v),f=smoothstep(.55,1.,fract(v));',
+    ' vec3 k0=vec3(.07,.06,.065),k1=vec3(.93,.1,.5),k2=vec3(.74,.6,.47),k3=vec3(.16,.47,.3),k4=vec3(.99,.76,.16),k5=vec3(.55,.05,.3);',
+    ' vec3 a=k0,b=k1;',
+    ' if(i==1.){a=k1;b=k2;}else if(i==2.){a=k2;b=k3;}else if(i==3.){a=k3;b=k4;}else if(i==4.){a=k4;b=k5;}else if(i==5.){a=k5;b=k0;}',
+    ' return mix(a,b,f);}',
     'void main(){',
     ' float m=min(uRes.x,uRes.y);',
     ' vec2 p=(gl_FragCoord.xy-uC*uRes)/m;',
-    ' float r=length(p),a=atan(p.y,p.x)+uSpin;',
+    ' float r=length(p),a=atan(p.y,p.x)+uSpin+uTime*.03;',
     ' vec2 d=vec2(cos(a),sin(a));',
-    ' float lr=log(r+.04);',
-    // broad soft rays (colour changes with angle, drifts slowly), plus fine streaks
-    ' float broad=fbm(vec3(d*1.15,uTime*.045-lr*.22));',
-    ' float fine=n(vec3(d*9.,uTime*.08-lr*.12));',
-    ' float v=(broad-.22)*1.65+fine*.1+uTime*.008;',
+    ' float z=log(r+.015);',                                              // depth: equal steps look equally far apart, like a tunnel
+    // colour fronts are born at the centre and rush outward past you
+    ' float shape=fbm(vec3(d*1.4,uTime*.06));',
+    ' float v=-z*.075+uTime*.045+(shape-.5)*.32;',
     ' vec3 col=pal(v);',
-    ' col=mix(col,vec3(dot(col,vec3(.3,.59,.11))),.12);',               // a touch softer, like Ragged Edge
-    ' col*=.78+.32*smoothstep(.0,1.,fine);',                            // streak texture
-    ' col=mix(col,vec3(1.,.93,.7),exp(-r*13.)*.85);',                    // bright core
-    ' col*=.8*(1.-.4*smoothstep(.5,1.3,r));',                           // a little darker overall, more toward the edges
+    // speed lines: thin rays racing outward at two speeds
+    ' float s1=n(vec3(d*11.,z*1.6-uTime*1.1));',
+    ' float s2=n(vec3(d*34.+7.,z*2.4-uTime*1.9));',
+    ' float streak=s1*.65+s2*.35;',
+    ' col*=.62+.62*smoothstep(.18,.95,streak);',
+    ' col=mix(col,vec3(1.,.96,.86),exp(-r*16.)*.9);',                    // bright core
+    ' col*=1.-.35*smoothstep(.45,1.4,r);',                                // darker toward the edges
+    ' col*=.88;',
     ' col+=(h(vec3(gl_FragCoord.xy,uTime))-.5)*.03;',                   // grain
     ' gl_FragColor=vec4(col,1.);',
     '}'].join('\n');
