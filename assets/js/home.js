@@ -78,17 +78,35 @@
     });
   }
 
-  /* ---------------- Leaving the hero: it scrolls away with the page while the picture breaks into fading points */
-  function heroOut() {
-    var hero = document.querySelector('.hero'); if (!hero || !window.gsap || !window.ScrollTrigger) return;
-    ScrollTrigger.create({ trigger: hero, start: 'top top', end: 'bottom top', scrub: true,
-      onUpdate: function (st) { if (window.SJ.heroScroll) window.SJ.heroScroll(Math.min(1, st.progress * 1.25)); } });
-    gsap.to('.hero .scrl', { opacity: 0, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: '15% top', scrub: true } });
-    gsap.to('#paint', { yPercent: 18, ease: 'none', scrollTrigger: { trigger: hero, start: 'top top', end: 'bottom top', scrub: true } });   // a little slower than the page
+  /* ---------------- Hero (after Ragged Edge)
+     - the name is sized to run edge to edge
+     - the rays stay on until the intro heading reaches the middle of the screen,
+       then fade out as the text turns black (and come back if you scroll up)
+     - once the big name has left the top, a small one appears in the nav */
+  function hero() {
+    var mark = document.querySelector('.wordmark'), span = mark && mark.querySelector('span');
+    function fit() {
+      if (!span) return;
+      mark.style.fontSize = '10px';                  // measure small, so the page never widens while measuring
+      var cs = getComputedStyle(mark), avail = mark.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      mark.style.fontSize = (10 * avail / span.getBoundingClientRect().width * .995).toFixed(2) + 'px';
+    }
+    fit(); addEventListener('resize', fit); if (document.fonts) document.fonts.ready.then(fit);
+    var head = document.querySelector('.intro-head'), scrl = document.querySelector('.hero .scrl'), nav = document.querySelector('.nav');
+    function check() {
+      var on = head ? head.getBoundingClientRect().top > innerHeight * .5 : true;
+      document.body.classList.toggle('rays-on', on);
+      if (window.SJ.raysOn) window.SJ.raysOn(on);
+      if (scrl) scrl.style.opacity = scrollY > 40 ? 0 : 1;
+      if (nav && mark) nav.classList.toggle('show-mark', mark.getBoundingClientRect().bottom < 70);
+    }
+    check();
+    if (window.SJ.lenis) window.SJ.lenis.on('scroll', check); else addEventListener('scroll', check, { passive: true });
+    addEventListener('resize', check);
   }
 
   function init() {
-    heroOut(); reel(); skills(); puzzle();
+    hero(); reel(); skills(); puzzle();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   if (window.SJ && window.SJ.ready) init(); else document.addEventListener('sj:ready', init);

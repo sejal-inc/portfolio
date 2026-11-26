@@ -6,6 +6,7 @@
    ========================================================================== */
 
 @font-face { font-family: "Geist"; src: url("../fonts/Geist.woff") format("woff"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Archivo"; src: url("../fonts/Archivo-wdth.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
 @font-face { font-family: "Unifraktur"; src: url("../fonts/UnifrakturMaguntia.ttf") format("truetype"); font-weight: 400; font-display: swap; }
 
 :root {
@@ -21,6 +22,7 @@
   --line-dark: rgba(245, 240, 230, .16);
 
   --sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --wide: "Archivo", "Geist", ui-sans-serif, system-ui, sans-serif;
   --gothic: "Unifraktur", "Old English Text MT", Georgia, serif;
 
   --gutter: max(20px, min(3.2vw, 48px));
@@ -170,26 +172,31 @@ a:hover .arrow, button:hover .arrow { transform: translateX(4px); }
 .loader.is-entering .loader-br, .loader.is-entering .void span, .loader.is-entering .loader-skip, .loader.is-entering .loader-hint, .loader.is-entering .loader-tap { opacity: 0; transition: opacity .4s; }
 @media (hover: none) { .loader-hint { display: none; } .loader.is-ready .loader-tap { display: block; } }
 @media (max-width: 640px) { .void { width: 94vw; font-size: 9px; letter-spacing: .06em; gap: 1.3em; } }
-/* ---------------------------------------------------------------- Hero
-   A full-screen section that simply scrolls away (with smooth, weighted scrolling),
-   while the picture breaks into fading points. */
-.hero { position: relative; height: 100svh; min-height: 520px; overflow: hidden; background: #0b0a0a; color: var(--cream); }
-.hero-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; pointer-events: none; }
-.hero-video.plain { opacity: 1; }
-.hero canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-.scrl { position: absolute; left: 50%; bottom: 30px; z-index: 3; transform: translateX(-50%); font: 400 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--cream); white-space: pre; }
-.scrl .g { color: rgba(245, 240, 230, .55); }
-
-/* Intro, unveiled: a soft wipe from left to right with a little focus pull */
-.intro { display: grid; justify-items: center; text-align: center; gap: 28px; padding-top: clamp(120px, 16vw, 220px); padding-bottom: clamp(120px, 16vw, 220px); }
-.intro .label { margin: 0; }
-.intro-text { font-size: clamp(28px, 3.4vw, 52px); font-weight: 300; letter-spacing: -0.04em; line-height: 1.1; margin: 0 auto; max-width: 22ch; text-wrap: balance; }
-.intro-text .gothic { font-size: 1.08em; }
-@property --u { syntax: '<percentage>'; inherits: false; initial-value: -30%; }
-.unveil { --u: -30%; -webkit-mask-image: linear-gradient(100deg, #000 var(--u), transparent calc(var(--u) + 30%)); mask-image: linear-gradient(100deg, #000 var(--u), transparent calc(var(--u) + 30%)); filter: blur(6px); transition: --u 2.2s cubic-bezier(.33, 0, .2, 1), filter 1.8s cubic-bezier(.33, 0, .2, 1); }
-.unveil.in { --u: 100%; filter: blur(0); }
-.intro .label.unveil { transition-delay: 0s; }
-.intro-text.unveil { transition-delay: .25s; }
+/* ---------------------------------------------------------------- Hero (after Ragged Edge)
+   Rays sit fixed behind the hero and the intro. The name and the pills scroll up
+   with the page; the intro comes up in white over the rays, and once it reaches the
+   middle of the screen the rays fade out and the text turns black. */
+.rays { position: fixed; inset: 0; width: 100vw; height: 100lvh; z-index: 0; display: block; pointer-events: none; background: #0b0a0a; transition: opacity .9s var(--ease); }
+.rays.fallback { background: radial-gradient(circle at 50% 50%, #FFE9A8 0 3%, #2E7D4F 18%, #FF0592 45%, #0b0a0a 80%); }
+body:not(.rays-on) .rays { opacity: 0; }
+.hero, .intro { position: relative; z-index: 1; }
+.hero { height: 100svh; min-height: 520px; display: grid; align-items: center; color: var(--cream); overflow: hidden; }
+.wordmark { margin: 0; padding: 0 var(--gutter); font-family: var(--wide); font-weight: 800; font-stretch: 125%; letter-spacing: -0.02em; line-height: .8; text-transform: uppercase; white-space: nowrap; color: var(--cream); font-size: 12vw; max-width: 100%; overflow: hidden; }
+.wordmark span { display: inline-block; transform-origin: left center; }
+.scrl { position: absolute; left: 50%; bottom: 30px; z-index: 3; transform: translateX(-50%); font: 400 12px/1 ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: .14em; text-transform: uppercase; color: var(--cream); white-space: pre; transition: opacity .5s; }
+.scrl .g { color: rgba(245, 240, 230, .6); }
+.intro { display: grid; justify-items: start; gap: 28px; padding-top: 22svh; padding-bottom: 30svh; color: var(--cream); transition: color .7s var(--ease); }
+body:not(.rays-on) .intro { color: var(--ink); }
+.intro-head { margin: 0; font-family: var(--wide); font-weight: 700; font-stretch: 125%; letter-spacing: -0.02em; line-height: 1; font-size: clamp(34px, 5.2vw, 84px); max-width: 16ch; text-wrap: balance; }
+.intro-text { margin: 0; font-size: clamp(20px, 2.1vw, 32px); font-weight: 350; letter-spacing: -0.02em; line-height: 1.28; max-width: 34ch; }
+/* the rest of the page sits on cream above the rays */
+body[data-page="home"] .page { background: var(--cream); }
+body[data-page="home"] .page > :not(.rays):not(.hero):not(.intro) { position: relative; z-index: 1; }
+/* the small name that replaces SCRL at the top once the big one has gone */
+.nav-mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); pointer-events: auto; font-family: var(--wide); font-weight: 800; font-stretch: 125%; text-transform: uppercase; font-size: 15px; letter-spacing: -0.01em; color: var(--ink); opacity: 0; transition: opacity .5s var(--ease), color .45s var(--ease); white-space: nowrap; }
+.nav.show-mark .nav-mark { opacity: 1; }
+.nav.on-dark .nav-mark { color: var(--cream); }
+@media (max-width: 640px) { .nav-mark { font-size: 12px; } }
 
 /* ---------------------------------------------------------------- Sections */
 .section { padding-top: clamp(88px, 11vw, 168px); padding-bottom: clamp(88px, 11vw, 168px); }

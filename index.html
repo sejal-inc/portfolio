@@ -10,12 +10,13 @@
 <meta property="og:description" content="Brand strategy, design systems and content that does its job.">
 <link rel="preload" href="assets/fonts/Geist.woff" as="font" type="font/woff" crossorigin>
 <link rel="preload" href="assets/fonts/UnifrakturMaguntia.ttf" as="font" type="font/ttf" crossorigin>
+<link rel="preload" href="assets/fonts/Archivo-wdth.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="preload" href="assets/img/macro/m00.jpg" as="image">
 
 <link rel="stylesheet" href="assets/css/main.css">
 <script>try{if(sessionStorage.getItem("sj.pt"))document.documentElement.classList.add("pt-in")}catch(e){}</script>
 </head>
-<body data-page="home">
+<body data-page="home" class="rays-on">
 
 <!-- Loader: first visit in a session only -->
 <div class="loader" role="dialog" aria-modal="true" aria-label="Loading">
@@ -38,18 +39,19 @@
 
 <div class="page">
 
-  <!-- Hero: running through a sunflower field, from below the flowers to above them -->
-  <header class="hero" data-dark>
-    <video id="run" class="hero-video" src="assets/video/run.mp4" muted playsinline preload="auto" aria-hidden="true"></video>
-    <canvas id="paint" aria-hidden="true"></canvas>
-    <h1 class="sr-only">Sejal Jain, marketing designer and brand strategist</h1>
+  <!-- Background rays: fixed behind the hero and intro, gone once the intro reaches the middle -->
+  <canvas id="rays" class="rays" aria-hidden="true"></canvas>
+
+  <!-- Hero: the name across the screen; it scrolls up with the page and leaves -->
+  <header class="hero">
+    <h1 class="wordmark" aria-label="Sejal Jain"><span>Sejal Jain</span></h1>
     <span class="scrl" aria-hidden="true">(&nbsp;<span class="g">s cr l</span>&nbsp;)</span>
   </header>
 
-  <!-- Intro: unveiled as it comes into view -->
+  <!-- Intro: rises over the rays in white, turns black as the rays clear -->
   <section class="intro wrap" aria-label="Introduction">
-    <p class="label unveil">Hello, I’m Sejal</p>
-    <p class="intro-text unveil">A marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and <span class="gothic">harder</span> to forget.</p>
+    <h2 class="intro-head">Brands that are hard to forget</h2>
+    <p class="intro-text">I’m Sejal, a marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and harder to forget.</p>
   </section>
 
   <!-- Selected work: a full-viewport image, then the three titles with timers on a rounded sheet -->
@@ -137,7 +139,7 @@
   </section>
 </div>
 
-<script src="assets/js/hero.js" defer></script>
+<script src="assets/js/rays.js" defer></script>
 <script src="assets/vendor/lenis.min.js" defer></script>
 <script src="assets/vendor/gsap.min.js" defer></script>
 <script src="assets/vendor/ScrollTrigger.min.js" defer></script>

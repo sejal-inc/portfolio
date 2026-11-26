@@ -170,7 +170,9 @@
       '<div>' + LINKS.slice(2).map(link).join('') +
         '<button class="pill round" type="button" data-sound aria-pressed="false" aria-label="Turn sound on"><span class="sound-bars" aria-hidden="true"><i></i><i></i><i></i></span></button>' +
         '<button class="pill menu-btn" type="button" data-menu-open aria-expanded="false" aria-controls="menu">Menu</button>' +
-      '</div>';
+      '</div>' +
+      '<a class="nav-mark" href="index.html" aria-label="Sejal Jain, home">Sejal Jain</a>';
+    if (!isHome) n.classList.add('show-mark');
     body.insertBefore(n, body.firstChild);
     // Home: the pills start at the bottom of the hero and travel up exactly with the scroll,
     // then stay at the top (no jump). Everywhere: they switch to dark glass over dark sections.
