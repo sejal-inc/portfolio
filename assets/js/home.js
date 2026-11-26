@@ -1,28 +1,29 @@
-/* Homepage: the work reel with timers, the skills strip, and the puzzle
+/* Homepage: the pinned project section, the skills strip, and the puzzle
    whose centre piece is missing until scrolling lifts the rest away. */
 (function () {
   'use strict';
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------------- Work reel: one wide image at a time, a timer under each title */
-  function reel() {
-    var r = document.querySelector('[data-reel]'); if (!r) return;
-    var slides = r.querySelectorAll('.reel-slide'), titles = r.querySelectorAll('.reel-title'), bars = r.querySelectorAll('.reel-title i');
-    var DUR = 6, i = 0, tw = null, visible = false, hover = false;
-    function show(n) {
-      slides[i].classList.remove('is-on'); titles[i].classList.remove('is-on');
-      bars.forEach(function (b, k) { if (window.gsap) gsap.set(b, { scaleX: k < n ? 1 : 0 }); });
-      i = n; slides[i].classList.add('is-on'); titles[i].classList.add('is-on');
-      if (tw) tw.kill();
-      if (!window.gsap || reduced) return;
-      tw = gsap.fromTo(bars[i], { scaleX: 0 }, { scaleX: 1, duration: DUR, ease: 'none', onComplete: function () { show((i + 1) % slides.length); } });
-      if (!visible || hover) tw.pause();
+  /* ---------------- Selected work: scrolling through a pinned screen swaps the project */
+  function projects() {
+    var sec = document.querySelector('[data-projects]'); if (!sec) return;
+    var groups = ['.proj-img', '.proj-title', '.proj-meta'].map(function (q) { return [].slice.call(sec.querySelectorAll(q)); });
+    var count = sec.querySelector('.proj-count b'), n = groups[0].length, cur = -1;
+    function show(k) {
+      if (k === cur) return;
+      groups.forEach(function (g) { g.forEach(function (el, j) { el.classList.toggle('is-on', j === k); el.classList.toggle('is-past', j < k); }); });
+      sec.querySelectorAll('a').forEach(function (a) { a.tabIndex = (a.closest('.is-on') ? 0 : -1); });
+      if (count) count.textContent = ('0' + (k + 1)).slice(-2);
+      if (cur !== -1 && window.SJ.sound) window.SJ.sound.tick(true);
+      cur = k;
     }
-    titles.forEach(function (t, k) { t.addEventListener('click', function () { if (k !== i) { show(k); if (window.SJ.sound) window.SJ.sound.tick(true); } }); });
-    r.addEventListener('pointerenter', function () { hover = true; if (tw) tw.pause(); });
-    r.addEventListener('pointerleave', function () { hover = false; if (tw && visible) tw.resume(); });
-    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (tw) { if (visible && !hover) tw.resume(); else tw.pause(); } }, { threshold: .35 }).observe(r);
-    show(0);
+    function check() {
+      var r = sec.getBoundingClientRect(), span = r.height - innerHeight;
+      var p = span > 0 ? Math.min(.999, Math.max(0, -r.top / span)) : 0;
+      show(Math.floor(p * n));
+    }
+    if (window.SJ.lenis) window.SJ.lenis.on('scroll', check); else addEventListener('scroll', check, { passive: true });
+    addEventListener('resize', check); check();
   }
 
   /* ---------------- Skills: duplicate the row so the strip loops without a seam */
@@ -89,7 +90,7 @@
       if (!span) return;
       mark.style.fontSize = '10px';                  // measure small, so the page never widens while measuring
       var cs = getComputedStyle(mark), avail = mark.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-      mark.style.fontSize = (10 * avail / span.getBoundingClientRect().width * .995).toFixed(2) + 'px';
+      mark.style.fontSize = (10 * avail / span.getBoundingClientRect().width * (innerWidth < 640 ? .92 : .76)).toFixed(2) + 'px';
     }
     fit(); addEventListener('resize', fit); if (document.fonts) document.fonts.ready.then(fit);
     var head = document.querySelector('.intro-head'), scrl = document.querySelector('.hero .scrl'), nav = document.querySelector('.nav');
@@ -106,7 +107,7 @@
   }
 
   function init() {
-    hero(); reel(); skills(); puzzle();
+    hero(); projects(); skills(); puzzle();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   if (window.SJ && window.SJ.ready) init(); else document.addEventListener('sj:ready', init);

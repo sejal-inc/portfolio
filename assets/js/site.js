@@ -247,6 +247,7 @@
     document.addEventListener('pointerover', function (e) {
       var t = e.target.closest('[data-cursor]'), kind = t && t.getAttribute('data-cursor');
       var l = e.target.closest('a, button, [role="button"]');
+      if (l && l.classList.contains('loader-go')) l = null;   // the loader's full-screen button keeps the ring small
       c.classList.toggle('is-work', kind === 'work');
       c.classList.toggle('is-puzzle', kind === 'puzzle');
       c.classList.toggle('is-lens', !!e.target.closest('.lens'));
@@ -307,8 +308,8 @@
      while images flick through it. Once loaded: click anywhere to dive in with
      sound, or "Enter without sound" at the bottom. The frame then opens out
      to full screen onto the hero. */
-  function scrambleTo(el, text) {
-    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', from = el.textContent, n = 0, total = 16;
+  function scrambleTo(el, text, total) {
+    var chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', n = 0; total = total || 16;
     (function step() {
       var out = '';
       for (var i = 0; i < text.length; i++) out += (n > total * (i + 1) / text.length || text[i] === ' ' || text[i] === '(' || text[i] === ')') ? text[i] : chars[Math.floor(Math.random() * chars.length)];
@@ -344,11 +345,16 @@
       if (shown >= 100) { finish(); return; }
       requestAnimationFrame(tick);
     })(t0);
+    // keywords come in as scrambled letters that settle, like SCRL
+    var words = [].slice.call(el.querySelectorAll('.void-row > span')).map(function (w) { var t = w.textContent; w.textContent = ''; return [w, t]; });
     function finish() {
       scrambleTo(status, '( LOADED )');
-      setTimeout(function () { ready = true; el.classList.add('is-ready'); el.querySelector('.loader-go').focus({ preventScroll: true }); }, 900);
+      setTimeout(function () {
+        ready = true; el.classList.add('is-ready'); el.querySelector('.loader-go').focus({ preventScroll: true });
+        words.forEach(function (w, i) { setTimeout(function () { w[0].textContent = w[1].replace(/\S/g, ' '); scrambleTo(w[0], w[1], 26); }, i * 70); });
+      }, 900);
     }
-    // "Click to enter with sound" sits just under the pointer
+    // "Click to enable sound" sits right beside the pointer
     el.addEventListener('pointermove', function (e) { hint.style.transform = 'translate(' + (e.clientX + 16) + 'px,' + (e.clientY - 5) + 'px)'; el.classList.add('has-pointer'); });
     function enter(sound) {
       if (!ready || entering) return;

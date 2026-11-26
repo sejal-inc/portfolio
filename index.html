@@ -29,9 +29,9 @@
     <span class="void-row"><span>Based&nbsp;in</span><span class="g">( Mumbai )</span><span>India</span></span>
     <span class="void-row"><span>Portfolio</span><span class="g">( 2026 )</span><span>Selected&nbsp;work</span></span>
   </div>
-  <button class="loader-go" type="button" aria-label="Enter with sound"></button>
-  <span class="loader-hint" aria-hidden="true">Click to enter with sound</span>
-  <p class="loader-tap">Tap to enter with sound</p>
+  <button class="loader-go" type="button" aria-label="Enter with sound on"></button>
+  <span class="loader-hint" aria-hidden="true">Click to enable sound</span>
+  <p class="loader-tap">Tap to enable sound</p>
   <p class="loader-status" aria-live="polite">( LOADING )</p>
   <button class="loader-skip" type="button">Enter without sound</button>
 </div>
@@ -49,23 +49,44 @@
 
   <!-- Intro: rises over the rays in white, turns black as the rays clear -->
   <section class="intro wrap" aria-label="Introduction">
-    <h2 class="intro-head">Brands that are hard to forget</h2>
-    <p class="intro-text">I’m Sejal, a marketing designer and brand strategist in Mumbai. I make brands easier to understand, easier to find and harder to forget.</p>
+    <h2 class="intro-head">I design brands that people understand, find and remember.</h2>
+    <div class="intro-stats">
+      <p><b>3+ years</b><span>designing for marketing teams</span></p>
+      <p><b>8 brands</b><span>from B2B SaaS to the G20</span></p>
+    </div>
   </section>
 
-  <!-- Selected work: a full-viewport image, then the three titles with timers on a rounded sheet -->
-  <section id="work" class="work-reel" aria-label="Selected work" data-reel>
-    <div class="reel" data-dark>
-      <a class="reel-slide is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
-      <a class="reel-slide" href="case-linen.html" data-cursor="work" aria-label="Winning back Google in six months: view case study"><div class="art art-linen" aria-hidden="true"></div></a>
-      <div class="reel-slide is-soon" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
-    </div>
-    <div class="reel-sheet wrap">
-      <div class="reel-head"><span class="label">Selected work</span><a class="label" href="work.html">View all work <span class="arrow" aria-hidden="true">→</span></a></div>
-      <div class="reel-titles">
-        <button class="reel-title is-on" type="button"><i></i><b>Rebuilt, not repainted</b><span>B2B SaaS · Design systems · Content design</span></button>
-        <button class="reel-title" type="button"><i></i><b>Winning back Google</b><span>D2C home linen · Brand voice · Search</span></button>
-        <button class="reel-title" type="button"><i></i><b>An invasive weed, worth bidding on</b><span>Passion project · Campaign · Brand</span></button>
+  <!-- Selected work: one screen, image on top and title below; scrolling swaps the project -->
+  <section id="work" class="projects" aria-label="Selected work" data-projects>
+    <div class="proj-stage" data-dark>
+      <div class="proj-media">
+        <a class="proj-img is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
+        <a class="proj-img" href="case-linen.html" data-cursor="work" aria-label="Winning back Google: view case study" tabindex="-1"><div class="art art-linen" aria-hidden="true"></div></a>
+        <div class="proj-img" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
+      </div>
+      <div class="proj-info wrap">
+        <div class="proj-top">
+          <div class="proj-titles">
+            <h3 class="proj-title is-on"><a href="case-blog.html"><span>Rebuilt, not repainted</span></a></h3>
+            <h3 class="proj-title"><a href="case-linen.html" tabindex="-1"><span>Winning back Google</span></a></h3>
+            <h3 class="proj-title"><span>An invasive weed, worth bidding on</span></h3>
+          </div>
+          <span class="proj-count" aria-hidden="true"><b>01</b> / 03</span>
+        </div>
+        <div class="proj-metas">
+          <dl class="proj-meta is-on">
+            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Design systems</span><span>Content design</span></dd></div>
+            <div><dt class="label">Deliverables</dt><dd>Blog design system, infographics, reading features, CMS components, measurement</dd></div>
+          </dl>
+          <dl class="proj-meta">
+            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Brand voice</span><span>Search</span><span>Analytics</span></dd></div>
+            <div><dt class="label">Deliverables</dt><dd>Diagnosis, brand voice, description framework, naming system, category launch</dd></div>
+          </dl>
+          <dl class="proj-meta">
+            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Campaign</span><span>Brand</span></dd></div>
+            <div><dt class="label">Deliverables</dt><dd>Case study coming soon</dd></div>
+          </dl>
+        </div>
       </div>
     </div>
   </section>
@@ -80,7 +101,7 @@
       <div class="num"><b class="lens">2</b><span>category leaders adopted a blog format I started</span></div>
     </div>
     <div class="num-ctas reveal">
-      <a class="btn" href="work.html">Read the case studies <span class="arrow" aria-hidden="true">→</span></a>
+      <a class="btn" href="work.html">See selected work <span class="arrow" aria-hidden="true">→</span></a>
     </div>
   </section>
 

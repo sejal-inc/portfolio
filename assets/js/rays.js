@@ -1,8 +1,7 @@
 /* Home background: colour rays rushing out from a bright centre, as if you were
-   moving forward through them (after Ragged Edge's hero). One or two brand colours
-   at a time (pink, cream, green, yellow, deep pink, ink) take turns coming
-   through. It stays fixed behind the hero and intro, eases its centre toward the
-   pointer, and fades out once the intro reaches the middle of the screen.
+   moving forward through them (after Ragged Edge's hero), with several brand colours
+   blending at once. It stays fixed behind the hero and intro, its centre follows
+   the pointer softly, and it fades out once the intro reaches the middle of the screen.
    Raw WebGL, no library; reduced resolution; paused when hidden. */
 (function () {
   'use strict';
@@ -23,33 +22,35 @@
     ' return mix(mix(mix(h(i),h(i+vec3(1,0,0)),f.x),mix(h(i+vec3(0,1,0)),h(i+vec3(1,1,0)),f.x),f.y),',
     '            mix(mix(h(i+vec3(0,0,1)),h(i+vec3(1,0,1)),f.x),mix(h(i+vec3(0,1,1)),h(i+vec3(1,1,1)),f.x),f.y),f.z);}',
     'float fbm(vec3 p){float v=0.,a=.5;for(int i=0;i<3;i++){v+=a*n(p);p=p*2.03+vec3(1.7,9.2,3.1);a*=.5;}return v;}',
-    // palette, in the order colours arrive: ink, pink, cream, green, yellow, deep pink.
-    // Each colour holds for a while, then hands over, so only one or two are ever on screen.
+    // palette as a loop that blends smoothly: pink, yellow, green, sand, ink.
+    // Different angles sit at different points on it, so several colours are always on screen.
     'vec3 pal(float v){',
-    ' v=fract(v)*6.;float i=floor(v),f=smoothstep(.55,1.,fract(v));',
-    ' vec3 k0=vec3(.07,.06,.065),k1=vec3(.93,.1,.5),k2=vec3(.74,.6,.47),k3=vec3(.16,.47,.3),k4=vec3(.99,.76,.16),k5=vec3(.55,.05,.3);',
+    ' v=fract(v)*5.;float i=floor(v),f=smoothstep(.15,.85,fract(v));',
+    ' vec3 k0=vec3(.9,.12,.5),k1=vec3(.96,.72,.18),k2=vec3(.17,.48,.31),k3=vec3(.76,.62,.5),k4=vec3(.16,.12,.14);',
     ' vec3 a=k0,b=k1;',
-    ' if(i==1.){a=k1;b=k2;}else if(i==2.){a=k2;b=k3;}else if(i==3.){a=k3;b=k4;}else if(i==4.){a=k4;b=k5;}else if(i==5.){a=k5;b=k0;}',
+    ' if(i==1.){a=k1;b=k2;}else if(i==2.){a=k2;b=k3;}else if(i==3.){a=k3;b=k4;}else if(i==4.){a=k4;b=k0;}',
     ' return mix(a,b,f);}',
     'void main(){',
     ' float m=min(uRes.x,uRes.y);',
     ' vec2 p=(gl_FragCoord.xy-uC*uRes)/m;',
-    ' float r=length(p),a=atan(p.y,p.x)+uSpin+uTime*.03;',
+    ' float r=length(p),a=atan(p.y,p.x)+uSpin+uTime*.025;',
     ' vec2 d=vec2(cos(a),sin(a));',
-    ' float z=log(r+.015);',                                              // depth: equal steps look equally far apart, like a tunnel
-    // colour fronts are born at the centre and rush outward past you
-    ' float shape=fbm(vec3(d*1.4,uTime*.06));',
-    ' float v=-z*.075+uTime*.045+(shape-.5)*.32;',
+    ' float z=log(r+.02);',                                               // depth, so the rays read as a tunnel
+    // colour: varies around the circle (several hues at once), drifts with time,
+    // and is carried outward from the centre so it feels like moving forward
+    ' float shape=fbm(vec3(d*1.25,uTime*.07+z*.05));',
+    ' float v=shape*2.6-z*.06+uTime*.035;',
     ' vec3 col=pal(v);',
-    // speed lines: thin rays racing outward at two speeds
-    ' float s1=n(vec3(d*11.,z*1.6-uTime*1.1));',
-    ' float s2=n(vec3(d*34.+7.,z*2.4-uTime*1.9));',
-    ' float streak=s1*.65+s2*.35;',
-    ' col*=.62+.62*smoothstep(.18,.95,streak);',
-    ' col=mix(col,vec3(1.,.96,.86),exp(-r*16.)*.9);',                    // bright core
-    ' col*=1.-.35*smoothstep(.45,1.4,r);',                                // darker toward the edges
-    ' col*=.88;',
-    ' col+=(h(vec3(gl_FragCoord.xy,uTime))-.5)*.03;',                   // grain
+    // soft speed lines racing outward
+    ' float s1=n(vec3(d*7.,z*1.3-uTime*.85));',
+    ' float s2=n(vec3(d*19.+7.,z*2.-uTime*1.4));',
+    ' float streak=s1*.7+s2*.3;',
+    ' col*=.74+.4*smoothstep(.1,1.,streak);',
+    ' col=mix(col,vec3(dot(col,vec3(.3,.59,.11))),.1);',                  // a touch less saturated
+    ' col=mix(col,vec3(1.,.95,.86),exp(-r*15.)*.85);',                   // bright core
+    ' col*=1.-.38*smoothstep(.45,1.4,r);',                                // darker toward the edges
+    ' col*=.82;',
+    ' col+=(h(vec3(gl_FragCoord.xy,uTime))-.5)*.025;',                  // grain
     ' gl_FragColor=vec4(col,1.);',
     '}'].join('\n');
   function sh(t, s) { var o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(o)); return null; } return o; }
@@ -68,19 +69,22 @@
   }
   size(); addEventListener('resize', size);
 
-  // the centre leans a little toward the pointer; quick moves turn the rays slightly
-  var tx = .5, ty = .52, cx = .5, cy = .52, spin = 0, lastX = null;
+  // the vanishing point follows the pointer with a soft lag, and sideways moves
+  // swirl the rays a little, so the whole field moves with you
+  var tx = .5, ty = .52, cx = .5, cy = .52, spin = 0, sp = 0, lastX = null;
   addEventListener('pointermove', function (e) {
-    tx = .5 + (e.clientX / innerWidth - .5) * .16; ty = .52 - (e.clientY / innerHeight - .5) * .12;
-    if (lastX !== null) spin += (e.clientX - lastX) / innerWidth * .25;
+    tx = .5 + (e.clientX / innerWidth - .5) * .36; ty = .52 - (e.clientY / innerHeight - .5) * .3;
+    if (lastX !== null) spin += (e.clientX - lastX) / innerWidth * .6;
     lastX = e.clientX;
   }, { passive: true });
 
-  var on = true, raf = 0, t0 = performance.now(), first = true, sp = 0;
+  var on = true, raf = 0, t0 = performance.now(), first = true, last = t0;
   SJ.raysOn = function (v) { if (v === on) return; on = v; if (on && !raf) raf = requestAnimationFrame(frame); };
   function frame(now) {
     raf = 0;
-    cx += (tx - cx) * .04; cy += (ty - cy) * .04; sp += (spin - sp) * .05; spin *= .985;
+    var dt = Math.min(.05, (now - last) / 1000); last = now;
+    var k = 1 - Math.exp(-dt * 2.6), ks = 1 - Math.exp(-dt * 3.2);
+    cx += (tx - cx) * k; cy += (ty - cy) * k; sp += (spin - sp) * ks; spin *= Math.exp(-dt * .9);
     gl.uniform1f(uTime, reduced ? 20 : (now - t0) / 1000);
     gl.uniform2f(uC, cx, cy); gl.uniform1f(uSpin, sp);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
