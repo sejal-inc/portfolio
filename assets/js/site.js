@@ -157,9 +157,9 @@
     { href: 'work.html', label: 'Selected work', key: 'work' },
     { href: 'backyard.html', label: 'Backyard', key: 'backyard' },
     { href: 'about.html', label: 'About', key: 'about' },
-    { href: contactHref, label: 'Contact', key: 'contact' }
+    { href: contactHref, label: 'Let’s talk', key: 'contact', cta: true }
   ];
-  function link(n) { return '<a class="pill nav-link" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }
+  function link(n) { return '<a class="pill nav-link' + (n.cta ? ' pill--cta' : '') + '" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }
 
   function buildNav() {
     var n = document.createElement('nav');
@@ -174,6 +174,9 @@
       '<a class="nav-mark" href="index.html" aria-label="Sejal Jain, home">Sejal Jain</a>';
     if (!isHome) n.classList.add('show-mark');
     body.insertBefore(n, body.firstChild);
+    // a soft blurred band behind the pills once they sit at the top
+    var veil = document.createElement('div'); veil.className = 'nav-veil'; veil.setAttribute('aria-hidden', 'true');
+    body.insertBefore(veil, n);
     // Home: the pills start at the bottom of the hero and travel up exactly with the scroll,
     // then stay at the top (no jump). Everywhere: they switch to dark glass over dark sections.
     var start = 0;
@@ -186,6 +189,8 @@
         var r = el.getBoundingClientRect(); if (r.height && r.top <= navY && r.bottom >= navY) dark = true;
       });
       n.classList.toggle('on-dark', dark);
+      veil.classList.toggle('on-dark', dark);
+      veil.classList.toggle('is-on', !isHome || y >= start - 2);
     }
     measure(); place(scrollY);
     window.SJ.navPlace = place;

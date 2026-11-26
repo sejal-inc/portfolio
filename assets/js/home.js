@@ -1,29 +1,49 @@
-/* Homepage: the pinned project section, the skills strip, and the puzzle
-   whose centre piece is missing until scrolling lifts the rest away. */
+/* Homepage: timed work carousel, results strip, process tabs, the skills strip, and the puzzle
+   (a random piece is missing; the cursor is that piece) that breaks apart as you scroll. */
 (function () {
   'use strict';
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  /* ---------------- Selected work: scrolling through a pinned screen swaps the project */
-  function projects() {
-    var sec = document.querySelector('[data-projects]'); if (!sec) return;
-    var groups = ['.proj-img', '.proj-title', '.proj-meta'].map(function (q) { return [].slice.call(sec.querySelectorAll(q)); });
-    var count = sec.querySelector('.proj-count b'), n = groups[0].length, cur = -1;
-    function show(k) {
-      if (k === cur) return;
-      groups.forEach(function (g) { g.forEach(function (el, j) { el.classList.toggle('is-on', j === k); el.classList.toggle('is-past', j < k); }); });
-      sec.querySelectorAll('a').forEach(function (a) { a.tabIndex = (a.closest('.is-on') ? 0 : -1); });
-      if (count) count.textContent = ('0' + (k + 1)).slice(-2);
-      if (cur !== -1 && window.SJ.sound) window.SJ.sound.tick(true);
-      cur = k;
+  /* ---------------- Timed tabs: used by Selected work and the process.
+     Each tab plays for `dur` seconds (a line fills over it), then the next one
+     comes up. Hovering pauses; clicking a tab jumps to it; offscreen it waits. */
+  function timedTabs(root, tabSel, slideSel, dur, fill) {
+    var tabs = [].slice.call(root.querySelectorAll(tabSel)), slides = [].slice.call(root.querySelectorAll(slideSel));
+    if (!tabs.length) return;
+    var i = 0, tw = null, visible = false, hover = false;
+    function show(n, user) {
+      i = n;
+      tabs.forEach(function (t, k) { t.classList.toggle('is-on', k === i); t.classList.toggle('is-done', k < i); t.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
+      slides.forEach(function (sl, k) { sl.classList.toggle('is-on', k === i); sl.querySelectorAll('a').forEach(function (a) { if (!a.hasAttribute('aria-hidden')) a.tabIndex = k === i ? 0 : -1; }); });
+      if (user && window.SJ.sound) window.SJ.sound.tick(true);
+      if (tw) tw.kill();
+      if (!window.gsap || reduced) return;
+      var bar = fill ? tabs[i].querySelector(fill) : null;
+      tabs.forEach(function (t, k) { var b = fill && t.querySelector(fill); if (b) gsap.set(b, { scaleX: k < i ? 1 : 0 }); });
+      tw = gsap.to(bar || {}, { scaleX: 1, duration: dur, ease: 'none', onComplete: function () { show((i + 1) % tabs.length); } });
+      if (!visible || hover) tw.pause();
     }
-    function check() {
-      var r = sec.getBoundingClientRect(), span = r.height - innerHeight;
-      var p = span > 0 ? Math.min(.999, Math.max(0, -r.top / span)) : 0;
-      show(Math.floor(p * n));
-    }
-    if (window.SJ.lenis) window.SJ.lenis.on('scroll', check); else addEventListener('scroll', check, { passive: true });
-    addEventListener('resize', check); check();
+    tabs.forEach(function (t, k) { t.addEventListener('click', function () { if (k !== i) show(k, true); }); });
+    root.addEventListener('pointerenter', function () { hover = true; if (tw) tw.pause(); });
+    root.addEventListener('pointerleave', function () { hover = false; if (tw && visible) tw.resume(); });
+    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (tw) { if (visible && !hover) tw.resume(); else tw.pause(); } }, { threshold: .3 }).observe(root);
+    show(0);
+  }
+  function work() { var r = document.querySelector('[data-work]'); if (r) timedTabs(r, '.work-tab', '.work-slide', 7, 'i b'); }
+  function process() { var r = document.querySelector('[data-process]'); if (r) timedTabs(r, '.proc-tab', '.proc-panel', 6, null); }
+
+  /* ---------------- Results: a sideways strip you can drag, or step with the arrows */
+  function results() {
+    var t = document.querySelector('[data-results]'); if (!t) return;
+    function step(dir) { var c = t.querySelector('.res-card'); t.scrollBy({ left: dir * (c ? c.offsetWidth + 20 : 300), behavior: 'smooth' }); }
+    var prev = document.querySelector('[data-res-prev]'), next = document.querySelector('[data-res-next]');
+    if (prev) prev.addEventListener('click', function () { step(-1); });
+    if (next) next.addEventListener('click', function () { step(1); });
+    var down = false, x0 = 0, s0 = 0, moved = false;
+    t.addEventListener('pointerdown', function (e) { if (e.pointerType !== 'mouse') return; down = true; moved = false; x0 = e.clientX; s0 = t.scrollLeft; t.classList.add('is-drag'); });
+    addEventListener('pointermove', function (e) { if (!down) return; var dx = e.clientX - x0; if (Math.abs(dx) > 3) moved = true; t.scrollLeft = s0 - dx; });
+    addEventListener('pointerup', function () { if (!down) return; down = false; t.classList.remove('is-drag'); });
+    t.addEventListener('click', function (e) { if (moved) { e.preventDefault(); e.stopPropagation(); } }, true);
   }
 
   /* ---------------- Skills: duplicate the row so the strip loops without a seam */
@@ -57,25 +77,49 @@
   }
 
   function puzzle() {
-    var wrap = document.querySelector('.pieces'); if (!wrap) return;
-    var narrow = innerWidth < 700, cols = narrow ? 5 : 9, rows = narrow ? 9 : 5;
-    var mid = { r: (rows - 1) / 2, c: (cols - 1) / 2 };
-    var list = piecePaths(cols, rows).filter(function (p) { return !(p.r === mid.r && p.c === mid.c); });
-    // each piece: a darker copy underneath for thickness, the face on top, a thin highlight
+    var wrap = document.querySelector('.pieces'), stage = document.querySelector('.puzzle-stage'); if (!wrap) return;
+    var narrow = innerWidth < 700, cols = narrow ? 6 : 12, rows = narrow ? 10 : 7;
+    var list = piecePaths(cols, rows);
+    // a different piece goes missing on every visit (never one on the edge)
+    var gapR = 1 + Math.floor(Math.random() * (rows - 2)), gapC = 1 + Math.floor(Math.random() * (cols - 2));
+    var gap = list.filter(function (p) { return p.r === gapR && p.c === gapC; })[0];
     wrap.innerHTML = '<svg viewBox="0 0 ' + cols * 100 + ' ' + rows * 100 + '" preserveAspectRatio="xMidYMid slice">' +
-      list.map(function (p) {
-        return '<g class="pc"><path class="side" d="' + p.d + '" transform="translate(0 7)"/><g class="face"><path class="top" d="' + p.d + '"/></g></g>';
-      }).join('') + '</svg>';
+      list.map(function (p) { return '<path' + (p === gap ? ' class="hole"' : '') + ' d="' + p.d + '"/>'; }).join('') + '</svg>';
+    var hole = wrap.querySelector('.hole');
+
+    // the cursor becomes the missing piece: small far away, its true size at the gap
+    var cur = document.querySelector('.cursor .piece');
+    if (cur && gap && window.SJ.fine) {
+      var x = gap.c * 100, y = gap.r * 100;
+      cur.style.transition = 'opacity .25s';
+      cur.innerHTML = '<svg viewBox="' + (x - 30) + ' ' + (y - 30) + ' 160 160"><path d="' + gap.d + '" fill="currentColor"/></svg>';
+      var size = 0, k = 0, kt = 0, raf = 0;
+      function fit() { var r = hole.getBoundingClientRect(); size = r.width / 100 * 160; cur.style.width = cur.style.height = size + 'px'; cur.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px'; }
+      function loop() {
+        k += (kt - k) * .18;
+        cur.style.transform = 'scale(' + k.toFixed(3) + ')';
+        raf = Math.abs(kt - k) > .002 ? requestAnimationFrame(loop) : 0;
+      }
+      stage.addEventListener('pointermove', function (e) {
+        if (!size) fit();
+        var r = hole.getBoundingClientRect(), hx = r.left + r.width / 2, hy = r.top + r.height / 2;
+        var d = Math.hypot(e.clientX - hx, e.clientY - hy), far = Math.hypot(innerWidth, innerHeight) * .55;
+        kt = .28 + .72 * Math.pow(1 - Math.min(1, d / far), 2.2);       // closer to the gap, bigger the piece
+        if (d < r.width * .18) kt = 1;
+        if (!raf) raf = requestAnimationFrame(loop);
+      });
+      addEventListener('resize', function () { size = 0; });
+    }
+
     if (reduced || !window.gsap) { wrap.style.display = 'none'; return; }
-    var groups = wrap.querySelectorAll('.pc'), mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my);
-    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: 1.2 } });
-    tl.to({}, { duration: .25 }); // a beat with the hole showing before anything moves
-    groups.forEach(function (g, i) {
-      var p = list[i], dx = p.cx - mx, dy = p.cy - my, dist = Math.hypot(dx, dy) / maxD, a = Math.atan2(dy, dx);
-      var push = 140 + dist * 260 + Math.random() * 60, at = .25 + dist * 1.1;
-      // lift first (the face rises off its edge), then drift outward and fade
-      tl.to(g.querySelector('.face'), { y: -7, duration: .3, ease: 'power2.out' }, at);
-      tl.to(g, { x: Math.cos(a) * push, y: Math.sin(a) * push - 30, rotation: (Math.random() - .5) * 24, opacity: 0, duration: 1, ease: 'power2.in' }, at + .12);
+    var paths = wrap.querySelectorAll('path:not(.hole)'), solid = list.filter(function (p) { return p !== gap; });
+    var mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my);
+    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6 } });
+    tl.to({}, { duration: .2 });   // a beat with the gap showing first
+    paths.forEach(function (el, i) {
+      var p = solid[i], dx = p.cx - mx, dy = p.cy - my, dist = Math.hypot(dx, dy) / maxD;
+      var a = Math.atan2(dy, dx), push = 600 + Math.random() * 500;
+      tl.to(el, { x: Math.cos(a) * push, y: Math.sin(a) * push, rotation: (Math.random() - .5) * 140, scale: .3, opacity: 0, ease: 'power2.in', duration: 1 }, .2 + dist * .9);   // the centre breaks open first
     });
   }
 
@@ -107,7 +151,7 @@
   }
 
   function init() {
-    hero(); projects(); skills(); puzzle();
+    hero(); work(); results(); process(); skills(); puzzle();
     if (window.ScrollTrigger) ScrollTrigger.refresh();
   }
   if (window.SJ && window.SJ.ready) init(); else document.addEventListener('sj:ready', init);

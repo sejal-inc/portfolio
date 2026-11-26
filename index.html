@@ -50,77 +50,112 @@
   <!-- Intro: rises over the rays in white, turns black as the rays clear -->
   <section class="intro wrap" aria-label="Introduction">
     <h2 class="intro-head">I design brands that people understand, find and remember.</h2>
-    <div class="intro-stats">
-      <p><b>3+ years</b><span>designing for marketing teams</span></p>
-      <p><b>8 brands</b><span>from B2B SaaS to the G20</span></p>
-    </div>
   </section>
 
-  <!-- Selected work: one screen, image on top and title below; scrolling swaps the project -->
-  <section id="work" class="projects" aria-label="Selected work" data-projects>
-    <div class="proj-stage" data-dark>
-      <div class="proj-media">
-        <a class="proj-img is-on" href="case-blog.html" data-cursor="work" aria-label="Rebuilt, not repainted: view case study"><div class="art art-blog" aria-hidden="true"></div></a>
-        <a class="proj-img" href="case-linen.html" data-cursor="work" aria-label="Winning back Google: view case study" tabindex="-1"><div class="art art-linen" aria-hidden="true"></div></a>
-        <div class="proj-img" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana" aria-hidden="true"></div><span class="soon">Coming soon</span></div>
-      </div>
-      <div class="proj-info wrap">
-        <div class="proj-top">
-          <div class="proj-titles">
-            <h3 class="proj-title is-on"><a href="case-blog.html"><span>Rebuilt, not repainted</span></a></h3>
-            <h3 class="proj-title"><a href="case-linen.html" tabindex="-1"><span>Winning back Google</span></a></h3>
-            <h3 class="proj-title"><span>An invasive weed, worth bidding on</span></h3>
-          </div>
-          <span class="proj-count" aria-hidden="true"><b>01</b> / 03</span>
-        </div>
-        <div class="proj-metas">
-          <dl class="proj-meta is-on">
-            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Design systems</span><span>Content design</span></dd></div>
-            <div><dt class="label">Deliverables</dt><dd>Blog design system, infographics, reading features, CMS components, measurement</dd></div>
-          </dl>
-          <dl class="proj-meta">
-            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Brand voice</span><span>Search</span><span>Analytics</span></dd></div>
-            <div><dt class="label">Deliverables</dt><dd>Diagnosis, brand voice, description framework, naming system, category launch</dd></div>
-          </dl>
-          <dl class="proj-meta">
-            <div><dt class="label">Responsibilities</dt><dd class="tags"><span>Campaign</span><span>Brand</span></dd></div>
-            <div><dt class="label">Deliverables</dt><dd>Case study coming soon</dd></div>
+  <!-- Selected work: a timed carousel (after Double Play). A line over each title fills as its project plays. -->
+  <section id="work" class="work wrap" aria-label="Selected work" data-work>
+    <h2 class="sec-title">Selected work</h2>
+    <div class="work-tabs" role="tablist" aria-label="Projects">
+      <button class="work-tab is-on" type="button" role="tab" aria-selected="true"><i aria-hidden="true"><b></b></i><span>Rebuilt, not repainted</span></button>
+      <button class="work-tab" type="button" role="tab" aria-selected="false"><i aria-hidden="true"><b></b></i><span>Winning back Google</span></button>
+      <button class="work-tab" type="button" role="tab" aria-selected="false"><i aria-hidden="true"><b></b></i><span>An invasive weed, worth bidding on</span></button>
+    </div>
+    <div class="work-slides">
+      <article class="work-slide is-on">
+        <div class="work-copy">
+          <h3>Rebuilt, not repainted</h3>
+          <p class="work-field">B2B SaaS · Expense management</p>
+          <p class="work-desc">A blog that looked fine and read badly. I rebuilt how it looked, read and was built, three times in three years, and measured every change.</p>
+          <a class="cta" href="case-blog.html">Read case study</a>
+          <dl class="work-stats">
+            <div><dt>3</dt><dd>blog design systems</dd></div>
+            <div><dt>2</dt><dd>category leaders adopted the format</dd></div>
+            <div><dt>16</dt><dd>features in one measurement system</dd></div>
           </dl>
         </div>
-      </div>
+        <a class="work-visual" href="case-blog.html" data-cursor="work" tabindex="-1" aria-hidden="true"><div class="art art-blog"></div></a>
+      </article>
+      <article class="work-slide">
+        <div class="work-copy">
+          <h3>Winning back Google</h3>
+          <p class="work-field">D2C home linen · Search and brand voice</p>
+          <p class="work-desc">Sales from search had collapsed. I found out why, rebuilt the brand’s voice and naming, and got its products back near the top of Google in six months.</p>
+          <a class="cta" href="case-linen.html">Read case study</a>
+          <dl class="work-stats">
+            <div><dt>+80%</dt><dd>clicks from product searches</dd></div>
+            <div><dt>Top 3</dt><dd>on Google for core products</dd></div>
+            <div><dt>2.6×</dt><dd>clicks to collection pages</dd></div>
+          </dl>
+        </div>
+        <a class="work-visual" href="case-linen.html" data-cursor="work" tabindex="-1" aria-hidden="true"><div class="art art-linen"></div></a>
+      </article>
+      <article class="work-slide">
+        <div class="work-copy">
+          <h3>An invasive weed, worth bidding on</h3>
+          <p class="work-field">Passion project · Cause campaign</p>
+          <p class="work-desc">Lantana is choking forests in the Western Ghats. The Soliga turn it into furniture. I’m building the brand that sells each piece, one of a kind, at an invite-only auction.</p>
+          <span class="cta is-soon">Case study coming soon</span>
+          <dl class="work-stats">
+            <div><dt>2023</dt><dd>started, still growing</dd></div>
+            <div><dt>3</dt><dd>partners: makers, research, a brand</dd></div>
+            <div><dt>1 of 1</dt><dd>every piece, numbered</dd></div>
+          </dl>
+        </div>
+        <div class="work-visual" data-cursor="work" data-cursor-text="Coming soon" aria-hidden="true"><div class="art art-lantana"></div></div>
+      </article>
     </div>
   </section>
 
-  <!-- What the work did -->
-  <section class="section wrap numbers" aria-label="Results">
-    <div class="copy reveal"><p>Good design is half the job. The other half is proving it worked.</p></div>
-    <div class="num-row reveal">
-      <div class="num"><b class="lens">+80%</b><span>clicks from product searches for a D2C brand, in six months</span></div>
-      <div class="num"><b class="lens">Top 3</b><span>on Google for that brand’s core products</span></div>
-      <div class="num"><b class="lens">2.6×</b><span>clicks to its collection pages from Google</span></div>
-      <div class="num"><b class="lens">2</b><span>category leaders adopted a blog format I started</span></div>
+  <!-- Results: cards in a sideways strip (after Collins) -->
+  <section class="results" aria-label="Results">
+    <div class="wrap results-head">
+      <h2 class="sec-title">What the work moved</h2>
+      <div class="results-nav"><button class="pill round" type="button" data-res-prev aria-label="Previous">←</button><button class="pill round" type="button" data-res-next aria-label="Next">→</button></div>
     </div>
-    <div class="num-ctas reveal">
-      <a class="btn" href="work.html">See selected work <span class="arrow" aria-hidden="true">→</span></a>
-    </div>
-  </section>
-
-  <!-- Brands -->
-  <section class="wrap" aria-label="Brands" style="padding-bottom:clamp(88px,11vw,168px)">
-    <div class="sec-head"><h2>Brands I’ve worked with</h2><span class="label">Hover for the work</span></div>
-    <div class="brands">
-      <div class="brand"><b>Sage Expense Management</b><span>In-house · 2023 to now</span></div>
-      <div class="brand"><b class="gothic">G20</b><span>Reports and collateral · 2023</span></div>
-      <div class="brand"><b>TEDx</b><span>Event identity · 2024</span></div>
-      <div class="brand"><b>MAHE Bengaluru</b><span>Identity system · 2024</span></div>
-      <div class="brand"><b>GOx</b><span>Brand work · 2024</span></div>
-      <div class="brand"><b class="gothic">Ledure</b><span>Lighting packaging · 2023</span></div>
-      <div class="brand"><b>Manohar International Airport</b><span>Brand extensions</span></div>
-      <div class="brand"><b>Oxford Bookstore</b><span>Centenary campaign</span></div>
+    <div class="results-track" data-results tabindex="0" aria-label="Results, scroll sideways">
+      <article class="res-card"><b class="lens">+80%</b><h3>Clicks from product searches</h3><p>For a D2C home linen brand, in six months, after a new voice, naming system and product descriptions.</p></article>
+      <article class="res-card"><b class="lens">Top 3</b><h3>On Google for core products</h3><p>The same brand’s main products back near the top of search, where they had been before sales dropped.</p></article>
+      <article class="res-card"><b class="lens">2.6×</b><h3>Clicks to collection pages</h3><p>Collections rebuilt around how people actually search, so Google had a reason to send them there.</p></article>
+      <article class="res-card"><b class="lens">2</b><h3>Category leaders followed</h3><p>Two leaders in B2B expense software adopted a blog format I started.</p></article>
+      <article class="res-card"><b class="lens">3</b><h3>Blog design systems</h3><p>Three systems in three years, each built on what the last one measured.</p></article>
+      <article class="res-card"><b class="lens">16</b><h3>Features, one measurement system</h3><p>Every reading feature on the blog tracked the same way, so design decisions rest on evidence.</p></article>
     </div>
   </section>
 
-  <!-- Skills: one slow strip -->
+  <!-- Process: four steps as tabs (after Morer) -->
+  <section class="process wrap" aria-label="Process" data-process>
+    <h2 class="sec-title">How I work</h2>
+    <div class="proc-tabs" role="tablist">
+      <button class="proc-tab is-on" type="button" role="tab" aria-selected="true">1. Listen</button>
+      <button class="proc-tab" type="button" role="tab" aria-selected="false">2. Define</button>
+      <button class="proc-tab" type="button" role="tab" aria-selected="false">3. Design</button>
+      <button class="proc-tab" type="button" role="tab" aria-selected="false">4. Prove</button>
+    </div>
+    <div class="proc-panels">
+      <div class="proc-panel is-on" role="tabpanel"><h3>Start with the business, not the brief.</h3><p>Before I open a design file, I talk to the people who sell, support and use the product, and read what the data already says.</p></div>
+      <div class="proc-panel" role="tabpanel"><h3>One sentence before a hundred screens.</h3><p>I write down what the brand stands for and who it’s for, so every later decision has something to answer to.</p></div>
+      <div class="proc-panel" role="tabpanel"><h3>Systems, not one-offs.</h3><p>Pages, campaigns and components built to be reused, so the brand stays recognisable as it grows and the team moves faster.</p></div>
+      <div class="proc-panel" role="tabpanel"><h3>Measure what moved.</h3><p>I set up the numbers before launch, so we know what worked, what didn’t and what to change next.</p></div>
+    </div>
+    <a class="cta" href="about.html">More about me</a>
+  </section>
+
+  <!-- Brands: rounded tiles (after Huge) -->
+  <section class="brands-sec wrap" aria-label="Brands">
+    <h2 class="sec-title">Brands I’ve worked with</h2>
+    <div class="brand-tiles">
+      <div class="tile"><b>Sage Expense Management</b><span>In-house · 2023 to now</span></div>
+      <div class="tile"><b class="gothic">G20</b><span>Reports and collateral · 2023</span></div>
+      <div class="tile"><b>TEDx</b><span>Event identity · 2024</span></div>
+      <div class="tile"><b>MAHE Bengaluru</b><span>Identity system · 2024</span></div>
+      <div class="tile"><b>GOx</b><span>Brand work · 2024</span></div>
+      <div class="tile"><b class="gothic">Ledure</b><span>Lighting packaging · 2023</span></div>
+      <div class="tile"><b>Manohar International Airport</b><span>Brand extensions</span></div>
+      <div class="tile"><b>Oxford Bookstore</b><span>Centenary campaign</span></div>
+    </div>
+  </section>
+
+  <!-- Skills: one slow strip (to be redesigned) -->
   <section aria-label="Skills" style="padding-bottom:clamp(88px,11vw,168px)">
     <div class="wrap sec-head" style="border-bottom:0"><h2>What I’m good at</h2><span class="label">Six things, done properly</span></div>
     <div class="skills-strip">
@@ -135,26 +170,24 @@
     </div>
   </section>
 
-  <!-- The puzzle: the centre piece is missing; scrolling lifts the rest away -->
+  <!-- The puzzle: one random piece is missing (the cursor is that piece); scrolling breaks the rest apart -->
   <section class="puzzle" aria-label="About">
-    <div class="puzzle-stage" data-cursor="puzzle" data-dark>
+    <div class="puzzle-stage" data-cursor="puzzle">
       <div class="puzzle-line">
         <p>Every brand is a <span class="gothic">puzzle.</span> I find the piece that’s missing.</p>
-        <a class="btn" href="about.html">More about me <span class="arrow" aria-hidden="true">→</span></a>
+        <a class="cta" href="about.html">More about me</a>
       </div>
       <div class="pieces" aria-hidden="true"></div>
     </div>
   </section>
 
-  <!-- Contact -->
-  <section class="section wrap contact" id="contact">
-    <p class="label" style="margin-bottom:24px">Contact</p>
-    <h2 class="display h2">Got a brand that needs to be <span class="gothic">understood?</span></h2>
-    <a class="big-cta" href="mailto:jsejaldesigns@gmail.com">Say yo <span class="arrow" aria-hidden="true">→</span></a>
-    <div class="contact-links">
-      <button class="btn btn--line" type="button" data-copy-email>Copy email</button>
-      <a class="btn btn--line" href="https://www.linkedin.com/in/jain-sejal" target="_blank" rel="noopener">LinkedIn ↗</a>
-      <a class="btn btn--line" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
+  <!-- Contact: one huge button -->
+  <section class="contact" id="contact" aria-label="Contact">
+    <a class="say-hi" href="mailto:jsejaldesigns@gmail.com"><span>Be kind, say hi</span></a>
+    <div class="contact-links wrap">
+      <button class="link-u" type="button" data-copy-email>Copy email</button>
+      <a class="link-u" href="https://www.linkedin.com/in/jain-sejal" target="_blank" rel="noopener">LinkedIn ↗</a>
+      <a class="link-u" href="resume.pdf" target="_blank" rel="noopener">Resume ↗</a>
     </div>
   </section>
 </div>
