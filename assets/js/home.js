@@ -8,13 +8,14 @@
      Each tab plays for `dur` seconds (a line fills over it), then the next one
      comes up. Hovering pauses; clicking a tab jumps to it; offscreen it waits. */
   function timedTabs(root, tabSel, slideSel, dur, fill) {
-    var tabs = [].slice.call(root.querySelectorAll(tabSel)), slides = [].slice.call(root.querySelectorAll(slideSel));
+    var tabs = [].slice.call(root.querySelectorAll(tabSel));
+    var groups = slideSel.split('|').map(function (q) { return [].slice.call(root.querySelectorAll(q)); });   // several sets that change together
     if (!tabs.length) return;
     var i = 0, tw = null, visible = false, hover = false;
     function show(n, user) {
       i = n;
       tabs.forEach(function (t, k) { t.classList.toggle('is-on', k === i); t.classList.toggle('is-done', k < i); t.setAttribute('aria-selected', k === i ? 'true' : 'false'); });
-      slides.forEach(function (sl, k) { sl.classList.toggle('is-on', k === i); sl.querySelectorAll('a').forEach(function (a) { if (!a.hasAttribute('aria-hidden')) a.tabIndex = k === i ? 0 : -1; }); });
+      groups.forEach(function (g) { g.forEach(function (sl, k) { sl.classList.toggle('is-on', k === i); sl.querySelectorAll('a').forEach(function (a) { if (!a.hasAttribute('aria-hidden')) a.tabIndex = k === i ? 0 : -1; }); }); });
       if (user && window.SJ.sound) window.SJ.sound.tick(true);
       if (tw) tw.kill();
       if (!window.gsap || reduced) return;
@@ -29,7 +30,7 @@
     new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (tw) { if (visible && !hover) tw.resume(); else tw.pause(); } }, { threshold: .3 }).observe(root);
     show(0);
   }
-  function work() { var r = document.querySelector('[data-work]'); if (r) timedTabs(r, '.work-tab', '.work-slide', 7, 'i b'); }
+  function work() { var r = document.querySelector('[data-work]'); if (r) timedTabs(r, '.work-tab', '.work-bg|.work-card', 7, 'i b'); }
   function process() { var r = document.querySelector('[data-process]'); if (r) timedTabs(r, '.proc-tab', '.proc-panel', 6, null); }
 
   /* ---------------- Results: a sideways strip you can drag, or step with the arrows */
@@ -87,35 +88,53 @@
       list.map(function (p) { return '<path' + (p === gap ? ' class="hole"' : '') + ' d="' + p.d + '"/>'; }).join('') + '</svg>';
     var hole = wrap.querySelector('.hole');
 
-    // the cursor becomes the missing piece: small far away, its true size at the gap
-    var cur = document.querySelector('.cursor .piece');
-    if (cur && gap && window.SJ.fine) {
+    // the cursor becomes the missing piece: small far away, its true size at the gap,
+    // with a hint beside it. Click the gap and the piece drops in.
+    var cursorEl = document.querySelector('.cursor'), cur = cursorEl && cursorEl.querySelector('.piece'), done = false;
+    var hint = null;
+    if (cursorEl) { hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'Complete the puzzle'; cursorEl.appendChild(hint); }
+    var size = 0, k = .3, kt = .3, raf = 0;
+    function fit() { var r = hole.getBoundingClientRect(); size = r.width / 100 * 160; if (cur) { cur.style.width = cur.style.height = size + 'px'; cur.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px'; } }
+    function loop() {
+      k += (kt - k) * .18;
+      if (cur) cur.style.transform = 'scale(' + k.toFixed(3) + ')';
+      if (hint) hint.style.setProperty('--hx', (done ? 16 : size * k * .42 + 14).toFixed(1) + 'px');
+      raf = Math.abs(kt - k) > .002 ? requestAnimationFrame(loop) : 0;
+    }
+    if (cur && gap) {
       var x = gap.c * 100, y = gap.r * 100;
       cur.style.transition = 'opacity .25s';
       cur.innerHTML = '<svg viewBox="' + (x - 30) + ' ' + (y - 30) + ' 160 160"><path d="' + gap.d + '" fill="currentColor"/></svg>';
-      var size = 0, k = 0, kt = 0, raf = 0;
-      function fit() { var r = hole.getBoundingClientRect(); size = r.width / 100 * 160; cur.style.width = cur.style.height = size + 'px'; cur.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px'; }
-      function loop() {
-        k += (kt - k) * .18;
-        cur.style.transform = 'scale(' + k.toFixed(3) + ')';
-        raf = Math.abs(kt - k) > .002 ? requestAnimationFrame(loop) : 0;
-      }
       stage.addEventListener('pointermove', function (e) {
+        if (done) return;
         if (!size) fit();
-        var r = hole.getBoundingClientRect(), hx = r.left + r.width / 2, hy = r.top + r.height / 2;
-        var d = Math.hypot(e.clientX - hx, e.clientY - hy), far = Math.hypot(innerWidth, innerHeight) * .55;
-        kt = .28 + .72 * Math.pow(1 - Math.min(1, d / far), 2.2);       // closer to the gap, bigger the piece
+        var r = hole.getBoundingClientRect(), d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+        kt = .28 + .72 * Math.pow(1 - Math.min(1, d / (Math.hypot(innerWidth, innerHeight) * .55)), 2.2);   // closer to the gap, bigger the piece
         if (d < r.width * .18) kt = 1;
         if (!raf) raf = requestAnimationFrame(loop);
       });
       addEventListener('resize', function () { size = 0; });
     }
+    stage.addEventListener('click', function (e) {
+      if (done || e.target.closest('a')) return;
+      var r = hole.getBoundingClientRect(), d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
+      if (d > r.width * .6) { if (hint) { hint.textContent = 'Closer…'; setTimeout(function () { if (!done) hint.textContent = 'Complete the puzzle'; }, 1200); } return; }
+      done = true;
+      hole.classList.add('is-filled');
+      if (window.gsap) gsap.fromTo(hole, { scale: 1.3 }, { scale: 1, duration: .6, ease: 'back.out(2)' });
+      if (cursorEl) cursorEl.classList.add('is-done');
+      if (hint) { hint.textContent = 'That’s the one. Now scroll.'; if (!raf) raf = requestAnimationFrame(loop); }
+      if (window.SJ.sound) window.SJ.sound.tick(true);
+    });
 
     if (reduced || !window.gsap) { wrap.style.display = 'none'; return; }
-    var paths = wrap.querySelectorAll('path:not(.hole)'), solid = list.filter(function (p) { return p !== gap; });
+    var paths = wrap.querySelectorAll('path'), solid = list;   // the filled piece breaks away with the rest
     var mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my);
     var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6 } });
     tl.to({}, { duration: .2 });   // a beat with the gap showing first
+    var line = document.querySelector('.puzzle-line');
+    gsap.set(line, { opacity: 0 });
+    tl.to(line, { opacity: 1, duration: .5, ease: 'none' }, .45);   // the line shows only as the pieces leave
     paths.forEach(function (el, i) {
       var p = solid[i], dx = p.cx - mx, dy = p.cy - my, dist = Math.hypot(dx, dy) / maxD;
       var a = Math.atan2(dy, dx), push = 600 + Math.random() * 500;

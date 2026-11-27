@@ -159,7 +159,7 @@
     { href: 'about.html', label: 'About', key: 'about' },
     { href: contactHref, label: 'Let’s talk', key: 'contact', cta: true }
   ];
-  function link(n) { return '<a class="pill nav-link' + (n.cta ? ' pill--cta' : '') + '" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }
+  function link(n) { return '<a class="' + (n.cta ? 'btn btn--sm' : 'pill') + ' nav-link" href="' + n.href + '"' + (n.key === page ? ' aria-current="page"' : '') + '>' + n.label + '</a>'; }
 
   function buildNav() {
     var n = document.createElement('nav');
