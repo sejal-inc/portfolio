@@ -35,8 +35,8 @@ five pair a sans with a serif or italic accent.
 
 ## 3. Tokens
 
-**Colour**: `--paper` #FFF page · `--cream` #F7F5F0 surfaces (cards, tiles; after
-Huge's #FAF8F4 and Collins' #F8F8F7) · `--cream-2` #EFECE5 hover · `--ink` #121011 ·
+**Colour**: (soft by design: no pure black, no hard edges; dark areas are inset with rounded corners) `--paper` #FFF page · `--cream` #F7F5F0 surfaces (cards, tiles; after
+Huge's #FAF8F4 and Collins' #F8F8F7) · `--cream-2` #EFECE5 hover · `--ink` #1D1B1C ·
 `--ink-soft` #6E6764 secondary text · `--on-dark` #F7F5F0 text on ink · `--pink` #FF0592
 accent only.
 
@@ -112,8 +112,16 @@ their own font, size, weight, line height or tracking)
   studies. Drifts on its own, pauses on hover, can be dragged; no first or last card.
 - **Snap** (`data-snap`): full-screen sections never stop half on screen; the page
   glides to the nearest clean edge in the direction you were scrolling.
-- **Footer**: a two-line message, then two stacked columns: Elsewhere (Instagram,
-  LinkedIn, Email) on the left, Pages on the right.
+- **Footer**: light cream; the page lifts off it with rounded corners and a soft
+  shadow. A two-line message, then two stacked columns: Around the house (pages)
+  on the left, Elsewhere (Instagram, LinkedIn, Email) on the right.
+- **Numbers**: only percentages and multiples; no absolute client figures anywhere.
+- **Page transition**: a light, curved sheet with a faint blurred glow (after
+  Supersolid); the new page settles in from a soft blur.
+- **Music**: one loop for home, about and backyard; a slower, drum-free version for
+  reading on the work and case study pages. It carries on from page to page.
+- **Placeholder images**: product renders from Poly Haven models and textures and
+  public-domain photos (CC0), in assets/img and assets/video, until real ones arrive.
 - **Cursor**: a 10px ring with a 1px line. It is ink over light surfaces and cream
   over dark ones (anything marked `data-dark`, the footer, the loader, the hero
   while the rays show), with a faint halo for mid tones. No blend modes.

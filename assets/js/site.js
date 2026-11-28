@@ -113,8 +113,10 @@
     ],
     penta: [523.25, 587.33, 659.25, 783.99, 880, 1046.5],
     beat: 60 / 84,
+    mood: /^(case|work)$/.test(document.body.getAttribute('data-page') || '') ? 'read' : 'main',
     /* One eighth note of the loop. */
     play: function (step, at) {
+      if (this.mood === 'read') return this.playRead(step, at);
       var self = this, beat = this.beat, s8 = step % 8, ch = this.prog[Math.floor(step / 8) % 4], t = at + (s8 % 2 ? beat / 2 * .14 : 0);
       if (s8 === 0) { ch.notes.forEach(function (f, i) { self.epiano(f, t + i * .018, .04, beat * 3.6); }); self.bass(ch.root, t, beat * 1.6); self.kick(t); }
       if (s8 === 3) ch.notes.slice(1, 4).forEach(function (f, i) { self.epiano(f, t + i * .012, .022, beat * 1.4); });
@@ -123,8 +125,17 @@
       self.shaker(t, s8 % 2 ? .014 : .006);
       if (s8 === 6 && Math.random() < .45) self.bell(this.penta[Math.floor(Math.random() * this.penta.length)], t);
     },
+    /* For reading: the same chords, slower and quieter, no drums. Long soft
+       chords, a low bass and the odd bell, so it sits under the words. */
+    playRead: function (step, at) {
+      var self = this, beat = this.beat, s8 = step % 8, ch = this.prog[Math.floor(step / 8) % 4];
+      if (s8 === 0) { ch.notes.forEach(function (f, i) { self.epiano(f, at + i * .03, .028, beat * 7); }); self.bass(ch.root, at, beat * 3.5); }
+      if (s8 === 4) ch.notes.slice(2, 4).forEach(function (f, i) { self.epiano(f * 2, at + i * .05, .01, beat * 3); });
+      if (s8 === 6 && Math.random() < .3) self.bell(this.penta[Math.floor(Math.random() * this.penta.length)], at);
+    },
     pad: function () {
       var self = this, c = this.ctx, eighth = this.beat / 2;
+      if (this.mood === 'read') { this.beat = 60 / 64; eighth = this.beat / 2; }
       var step = 0, next = c.currentTime + .1;
       clearInterval(this.padTimer);
       this.padTimer = setInterval(function () {
@@ -239,8 +250,8 @@
     f.innerHTML =
       '<p class="footer-msg">Thanks for staying till the end.<br>Now go make something you’re <span class="accent">proud</span> of.</p>' +
       '<div class="footer-cols">' +
-        '<nav class="footer-col" aria-label="Elsewhere"><span class="label">Elsewhere</span>' + social.map(function (l) { return '<a href="' + l[0] + '"' + (l[0].indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') + '>' + l[1] + ' <span aria-hidden="true">↗</span></a>'; }).join('') + '</nav>' +
-        '<nav class="footer-col footer-col--r" aria-label="Pages"><span class="label">Pages</span>' + pages.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
+        '<nav class="footer-col" aria-label="Around the house"><span class="label">Around the house</span>' + pages.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
+        '<nav class="footer-col footer-col--r" aria-label="Elsewhere"><span class="label">Elsewhere</span>' + social.map(function (l) { return '<a href="' + l[0] + '"' + (l[0].indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') + '>' + l[1] + ' <span aria-hidden="true">↗</span></a>'; }).join('') + '</nav>' +
       '</div>' +
       '<div class="footer-base"><small>© 2026 Sejal Jain</small><small>Mumbai, India</small></div>';
     body.appendChild(f);
@@ -292,7 +303,7 @@
     // the ring is ink on light surfaces and cream on dark ones, so it never disappears
     function onDark() {
       var el = document.elementFromPoint(x, y); if (!el) return false;
-      if (el.closest('[data-dark], .footer, .menu.is-open, .loader, .lost')) return true;
+      if (el.closest('[data-dark], .loader, .lost')) return true;
       return body.classList.contains('rays-on') && !!el.closest('.hero, .intro');
     }
     (function loop() {
@@ -496,32 +507,53 @@
      screen, or the section fully gone. */
   function snapSections() {
     var els = [].slice.call(document.querySelectorAll('[data-snap]')); if (!els.length) return;
-    var last = scrollY, dir = 1, timer = null, gliding = false;
+    var last = scrollY, dir = 1, timer = null, gliding = false, cool = false, lastWheel = 0, lastAbs = 0;
     function docTop(el) { return el.getBoundingClientRect().top + scrollY; }
+    function stopsAt() {
+      var vh = innerHeight, st = [];
+      els.forEach(function (el) { var t = docTop(el), h = el.offsetHeight; st.push(t - vh, t, t + h - vh, t + h); });
+      var max = document.documentElement.scrollHeight - vh;
+      return st.map(function (v) { return Math.round(Math.max(0, Math.min(max, v))); })
+        .filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return a - b; });
+    }
+    function glide(target) {
+      gliding = true;
+      var done = function () { gliding = false; cool = true; last = scrollY; };
+      if (window.SJ.lenis) window.SJ.lenis.scrollTo(target, { duration: .75, easing: function (t) { return 1 - Math.pow(1 - t, 3); }, onComplete: done, force: true });
+      else { scrollTo({ top: target, behavior: 'smooth' }); setTimeout(done, 750); }
+    }
+    // Wheel: each gesture inside a snap zone goes straight to the next clean
+    // edge (one gesture, one screen). The tail of a trackpad flick is ignored.
+    window.SJ.snapWheel = function (e) {
+      var ev = e.event; if (!ev || ev.type !== 'wheel' || !e.deltaY) return true;
+      var now = performance.now(), abs = Math.abs(e.deltaY), fresh = now - lastWheel > 160 || abs > lastAbs * 1.8 + 8;
+      lastWheel = now; lastAbs = abs;
+      if (gliding) { ev.preventDefault(); return false; }
+      var y = window.SJ.lenis ? window.SJ.lenis.animatedScroll : scrollY, st = stopsAt();
+      var lo = st[0], hi = st[st.length - 1], down = e.deltaY > 0;
+      if (y < lo - 2 || y > hi + 2 || (down && y >= hi - 2) || (!down && y <= lo + 2)) { cool = false; return true; }
+      if (cool && !fresh) { ev.preventDefault(); return false; }   // momentum from the last jump
+      cool = false;
+      var target = down ? st.filter(function (v) { return v > y + 2; })[0] : st.filter(function (v) { return v < y - 2; }).pop();
+      if (target === undefined) return true;
+      ev.preventDefault(); glide(target); return false;
+    };
+    // Touch, scrollbar, keys: when scrolling settles half way, finish the move.
     function settle() {
       if (gliding || document.querySelector('.menu.is-open')) return;
-      var y = scrollY, vh = innerHeight, stops = [], inside = false;
-      els.forEach(function (el) {
-        var t = docTop(el), h = el.offsetHeight;
-        if (y > t - vh + 2 && y < t + h - 2) inside = true;
-        stops.push(t - vh, t, t + h - vh, t + h);
-      });
+      var y = scrollY, vh = innerHeight, inside = false;
+      els.forEach(function (el) { var t = docTop(el), h = el.offsetHeight; if (y > t - vh + 2 && y < t + h - 2) inside = true; });
       if (!inside) return;
-      stops = stops.filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return a - b; });
-      if (stops.some(function (v) { return Math.abs(v - y) < 3; })) return;   // already clean
-      var target = dir > 0 ? stops.filter(function (v) { return v > y; })[0] : stops.filter(function (v) { return v < y; }).pop();
-      if (target === undefined) return;
-      // a tiny nudge past a clean edge should come back, not throw the page a full screen
-      var back = dir > 0 ? stops.filter(function (v) { return v < y; }).pop() : stops.filter(function (v) { return v > y; })[0];
+      var st = stopsAt();
+      if (st.some(function (v) { return Math.abs(v - y) < 3; })) return;
+      var target = dir > 0 ? st.filter(function (v) { return v > y; })[0] : st.filter(function (v) { return v < y; }).pop();
+      var back = dir > 0 ? st.filter(function (v) { return v < y; }).pop() : st.filter(function (v) { return v > y; })[0];
       if (back !== undefined && Math.abs(y - back) < 40) target = back;
-      gliding = true;
-      var done = function () { gliding = false; last = scrollY; };
-      if (window.SJ.lenis) window.SJ.lenis.scrollTo(target, { duration: .9, easing: function (t) { return 1 - Math.pow(1 - t, 3); }, onComplete: done });
-      else { scrollTo({ top: target, behavior: 'smooth' }); setTimeout(done, 900); }
+      if (target !== undefined) glide(target);
     }
     function onScroll() {
       var y = scrollY; if (y !== last) dir = y > last ? 1 : -1; last = y;
-      clearTimeout(timer); if (!gliding) timer = setTimeout(settle, 160);
+      clearTimeout(timer); if (!gliding) timer = setTimeout(settle, 140);
     }
     if (window.SJ.lenis) window.SJ.lenis.on('scroll', onScroll); else addEventListener('scroll', onScroll, { passive: true });
   }
@@ -529,7 +561,8 @@
   /* ------------------------------------------------------------------ Start */
   if (window.gsap) { if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger); if (window.ScrollToPlugin) gsap.registerPlugin(ScrollToPlugin); }
   if (window.Lenis && !reduced) {
-    var lenis = new Lenis({ duration: 1.25, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); }, smoothWheel: true });
+    var lenis = new Lenis({ duration: 1.25, easing: function (t) { return Math.min(1, 1.001 - Math.pow(2, -10 * t)); }, smoothWheel: true,
+      virtualScroll: function (e) { return window.SJ.snapWheel ? window.SJ.snapWheel(e) : true; } });
     window.SJ.lenis = lenis;
     lenis.on('scroll', function (e) { if (window.ScrollTrigger) ScrollTrigger.update(); if (window.SJ.navPlace) window.SJ.navPlace(e.scroll); });
     if (window.gsap) { gsap.ticker.add(function (t) { lenis.raf(t * 1000); }); gsap.ticker.lagSmoothing(0); }
@@ -560,8 +593,17 @@
 
   // Returning visitors who chose sound: resume on their first tap (browsers need one)
   if (store.get('sound') === 'on' && (store.sget('entered') || !isHome)) {
-    var resume = function () { Sound.setOn(true); removeEventListener('pointerdown', resume); removeEventListener('keydown', resume); };
-    addEventListener('pointerdown', resume); addEventListener('keydown', resume);
+    // Music carries on from the last page. Most browsers let a site that was just
+    // clicked keep playing; where one wants a fresh gesture, the first touch,
+    // click or key on this page starts it again.
+    Sound.setOn(true);
+    var evs = ['pointerdown', 'keydown', 'touchstart', 'wheel'];
+    var nudge = function () {
+      if (!Sound.on || !Sound.ctx) return;
+      if (Sound.ctx.state !== 'running') Sound.ctx.resume();
+      if (Sound.ctx.state === 'running') evs.forEach(function (n) { removeEventListener(n, nudge, true); });
+    };
+    evs.forEach(function (n) { addEventListener(n, nudge, { capture: true, passive: true }); });
   }
 
   runLoader(function () {

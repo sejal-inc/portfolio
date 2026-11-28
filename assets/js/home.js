@@ -103,7 +103,6 @@
   function shelf() {
     var sec = document.querySelector('[data-shelf]'); if (!sec) return;
     var stage = sec.querySelector('.shelf3d');
-    if (!matchMedia('(hover: hover)').matches) { var hint = sec.querySelector('.shelf-hint'); if (hint) hint.textContent = 'Tap anything on the shelf'; }
     var started = false;
     function start() {
       if (started) return; started = true;
@@ -153,38 +152,82 @@
     var hole = wrap.querySelector('.hole');
     stage.setAttribute('data-dark', '');
 
-    // the missing piece, waiting off screen; scrolling brings it in
-    var svg = wrap.querySelector('svg'), drop = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    drop.setAttribute('d', gap.d); drop.setAttribute('class', 'drop'); svg.appendChild(drop);
+    // the missing piece, waiting off screen: an outer group (moved by the unfurl)
+    // around an inner one (moved by the entrance), holding a soft shadow and the piece
+    var NS = 'http://www.w3.org/2000/svg', svg = wrap.querySelector('svg');
+    function el(tag, cls, parent) { var e = document.createElementNS(NS, tag); if (cls) e.setAttribute('class', cls); (parent || svg).appendChild(e); return e; }
+    var dropW = el('g', 'drop-w'), dropM = el('g', 'drop-m', dropW);
+    var shadow = el('path', 'drop-sh', dropM), drop = el('path', 'drop', dropM);
+    shadow.setAttribute('d', gap.d); drop.setAttribute('d', gap.d);
+    var sparks = el('g', 'sparks');
 
     if (reduced || !window.gsap) { wrap.style.display = 'none'; return; }
     var W = cols * 100, Hh = rows * 100, mx = W / 2, my = Hh / 2, maxD = Math.hypot(mx, my), line = document.querySelector('.puzzle-line');
-    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6,
-      onUpdate: function (st) { stage.toggleAttribute('data-dark', st.progress < .7); } } });   // dark while the pieces cover it
+    var hx = gap.cx, hy = gap.cy;
+    gsap.set(dropM, { svgOrigin: hx + ' ' + hy });   // turn and scale around the gap's centre
+
+    /* 1. The entrance plays on its own clock (smooth, never tied to scroll speed):
+          from the corner nearest the gap it swoops in, spirals once around the gap,
+          leaving small sparkles behind, and presses into place. */
+    var sx = (hx < mx ? -260 : W + 260) - hx, sy = (hy < my ? -260 : Hh + 260) - hy;
+    var a0 = Math.atan2(sy, sx), R0 = 380, ex = Math.cos(a0) * R0, ey = Math.sin(a0) * R0;
+    var len = Math.hypot(ex - sx, ey - sy), px = -(ey - sy) / len, py = (ex - sx) / len;
+    var cxp = (sx + ex) / 2 + px * len * .35, cyp = (sy + ey) / 2 + py * len * .35;
+    var spin = 1;                                  // which way it circles
+    function at(u) {                               // position along the path, u 0..1
+      if (u < .32) { var k = u / .32, q = 1 - k; return [q * q * sx + 2 * q * k * cxp + k * k * ex, q * q * sy + 2 * q * k * cyp + k * k * ey]; }
+      var v = (u - .32) / .68, a = a0 + spin * Math.PI * 2 * v, r = R0 * Math.pow(1 - v, 1.6);
+      return [Math.cos(a) * r, Math.sin(a) * r];
+    }
+    var COLORS = ['#FF0592', '#FFD27A', '#FFFFFF', '#FF7CC4'];
+    var STAR = 'M0 -10 C1.2 -2.4 2.4 -1.2 10 0 C2.4 1.2 1.2 2.4 0 10 C-1.2 2.4 -2.4 1.2 -10 0 C-2.4 -1.2 -1.2 -2.4 0 -10 Z';
+    function sparkle(x, y, burst) {
+      var g = el('path', 'spark', sparks), k = (burst ? .9 : .5) + Math.random() * .8;
+      g.setAttribute('d', STAR); g.style.fill = COLORS[Math.floor(Math.random() * COLORS.length)];
+      var dx = burst ? Math.cos(burst) * (90 + Math.random() * 60) : (Math.random() - .5) * 30, dy = burst ? Math.sin(burst) * (90 + Math.random() * 60) : 18 + Math.random() * 24;
+      gsap.fromTo(g, { x: hx + x, y: hy + y, scale: 0, rotation: 0, opacity: 1 },
+        { x: hx + x + dx, y: hy + y + dy, scale: k, rotation: 120, opacity: 0, duration: burst ? .9 : .75 + Math.random() * .4, ease: 'power2.out', onComplete: function () { g.remove(); } });
+    }
+    var state = { u: 0 }, lastSpark = 0, entered = false;
+    var entry = gsap.timeline({ paused: true, onStart: function () { stage.classList.add('is-arriving'); } });
+    entry.set(dropW, { opacity: 1 })
+      .fromTo(state, { u: 0 }, { u: 1, duration: 1.7, ease: 'power2.inOut', onUpdate: function () {
+        var u = state.u, p = at(u), tilt = (1 - u) * Math.sin(u * Math.PI * 4) * 22;
+        gsap.set(dropM, { x: p[0], y: p[1], rotation: tilt + (1 - u) * 18, scale: 1.18 - .1 * u });
+        var now = performance.now();
+        if (u < .97 && now - lastSpark > 34) { lastSpark = now; sparkle(p[0], p[1]); }
+      } })
+      .to(dropM, { scale: 1, rotation: 0, x: 0, y: 0, duration: .22, ease: 'power2.in' })
+      .to(shadow, { opacity: 0, duration: .22, ease: 'power2.in' }, '<')
+      // 2. once it fits it belongs to the puzzle: pink turns black, with a small burst
+      .add(function () { for (var i = 0; i < 12; i++) sparkle(0, 0, i / 12 * Math.PI * 2 + Math.random() * .3); })
+      .to(drop, { fill: '#1D1B1C', duration: .45, ease: 'power1.inOut' })
+      .fromTo(dropM, { scale: 1.06 }, { scale: 1, duration: .45, ease: 'back.out(3)' }, '<');
+    function resetEntry() { entry.pause(0); gsap.set(dropW, { opacity: 0 }); gsap.set(dropM, { x: sx, y: sy }); gsap.set(drop, { fill: '#FF0592' }); gsap.set(shadow, { opacity: 1 }); entered = false; }
+    resetEntry();
+    window.SJ.puzzleEntry = entry;
+
+    /* 3. Scrolling on unfurls it from the centre: the middle pieces open together
+          and every piece flies out towards the nearest corner. */
+    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: 1,
+      onUpdate: function (st) {
+        stage.toggleAttribute('data-dark', st.progress < .72);
+        if (st.progress > .02 && !entered) { entered = true; entry.play(0); }
+        if (st.progress > .3 && entry.progress() < 1) entry.progress(1);   // scrolled fast: finish the entrance first
+        if (st.progress < .005 && entered) resetEntry();
+      } } });
     gsap.set(line, { opacity: 0 });
-    // 1. the missing piece slides in from the bottom right, held a little above the
-    //    board (bigger, with a shadow), curving in towards its gap
-    var sx = W - gap.cx + 260, sy = Hh - gap.cy + 220;
-    tl.fromTo(drop, { x: sx, y: sy, rotation: 24, scale: 1.14, '--sh': 1 }, {
-      keyframes: [
-        { x: sx * .38, y: sy * .2, rotation: 9, scale: 1.12, ease: 'sine.inOut', duration: .6 },
-        { x: 3, y: -4, rotation: -1.5, scale: 1.06, ease: 'power2.out', duration: .28 },
-        { x: 0, y: 0, rotation: 0, scale: 1, '--sh': 0, ease: 'power2.in', duration: .12 }   // pressed into place
-      ], duration: .4 }, .02);
-    // 2. once it fits it becomes part of the puzzle: pink turns black
-    tl.to(drop, { fill: '#121011', duration: .08, ease: 'none' }, .44);
-    tl.to({}, { duration: .1 }, .52);   // a beat with the puzzle complete
-    // 3. it unfurls from the centre: the middle opens first and every piece flies
-    //    out towards the nearest corner, turning and shrinking as it goes
-    var paths = [].slice.call(wrap.querySelectorAll('path:not(.hole):not(.drop)')), solid = list.filter(function (p) { return p !== gap; });
-    paths.push(drop); solid.push(gap);
-    paths.forEach(function (el, i) {
+    tl.to({}, { duration: .5 });   // the entrance has the stage to itself
+    var paths = [].slice.call(wrap.querySelectorAll('path:not(.hole):not(.drop):not(.drop-sh)')).filter(function (p) { return !p.closest('.sparks'); });
+    var solid = list.filter(function (p) { return p !== gap; });
+    paths.push(dropW); solid.push(gap);
+    paths.forEach(function (node, i) {
       var p = solid[i], dx = p.cx - mx, dy = p.cy - my, dist = Math.hypot(dx, dy) / maxD;
       var a = Math.atan2(dy, dx), push = 600 + Math.random() * 500;
-      tl.to(el, { x: '+=' + (Math.cos(a) * push).toFixed(1), y: '+=' + (Math.sin(a) * push).toFixed(1), rotation: (Math.random() - .5) * 140, scale: .3, opacity: 0, ease: 'power2.in', duration: .5 }, .6 + dist * .45);
+      tl.to(node, { x: (Math.cos(a) * push).toFixed(1), y: (Math.sin(a) * push).toFixed(1), rotation: (Math.random() - .5) * 140, scale: .3, opacity: 0, ease: 'power2.in', duration: .5, transformOrigin: '50% 50%' }, .55 + Math.max(0, dist - .14) * .5);
     });
-    tl.to(line, { opacity: 1, duration: .3, ease: 'none' }, .78);   // the line shows as the pieces clear
-    tl.to({}, { duration: .2 });   // the line holds, clean, before the section ends
+    tl.to(line, { opacity: 1, duration: .3, ease: 'none' }, .74);
+    tl.to({}, { duration: .25 });   // the line holds, clean, before the section ends
   }
 
   /* ---------------- Hero (after Ragged Edge)

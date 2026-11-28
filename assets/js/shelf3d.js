@@ -21,7 +21,7 @@ const ITEMS = [
   { book: 'Content design', line: 'Words and layouts that do the explaining.', c: '#FF0592', ink: '#121011', T: 34, W: 168, H: 262 },
   { file: 'measuring_tape_01', h: 92, face: 90, idle: 30, title: 'Measurement', line: 'Every launch gets a number.' },
   { file: 'Megaphone_01', h: 150, face: 75, idle: 0, title: 'Launches', line: 'Making noise on day one.' },
-  { file: 'desk_lamp_arm_01', h: 300, face: 90, idle: 35, title: 'Craft', line: 'The last ten percent is where it shows.' },
+  { file: 'desk_lamp_arm_01', h: 260, face: 90, idle: 35, title: 'Craft', line: 'The last ten percent is where it shows.' },
   { book: 'Brand identity', line: 'Logos, type and colour that hold together.', c: '#2E4A3C', ink: '#F7F5F0', T: 40, W: 180, H: 244 },
   { file: 'vintage_video_camera', h: 190, face: 25, idle: 90, title: 'Social and video', line: 'Reels and films with a point.' },
   { file: 'rubber_duck_toy', h: 118, face: 0, idle: 70, title: 'Thinking out loud', line: 'Every idea gets talked through first.' },
@@ -32,11 +32,14 @@ const ITEMS = [
   { file: 'seadogs_compass', h: 104, face: 20, idle: 80, title: 'Direction', line: 'Strategy first, then the pretty part.' }
 ];
 
-const GAP = 30, SPEED = 22, OPEN_SCALE = 1.16, LIFT = 10, PUSH = 26;
+const GAP = 30, SPEED = 34, OPEN_SCALE = 1.16, LIFT = 10, PUSH = 26;
 
 export async function mount(root, base) {
   const canvas = root.querySelector('canvas'), cap = root.querySelector('.shelf-cap');
   const capT = cap.querySelector('b'), capL = cap.querySelector('span');
+  // like the loader's "Click to enable sound": a small label beside the pointer
+  const follow = document.createElement('span'); follow.className = 'shelf-follow'; follow.textContent = 'Hover on an object';
+  root.appendChild(follow);
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
@@ -111,6 +114,9 @@ export async function mount(root, base) {
   function resize() {
     W = root.clientWidth; H = root.clientHeight;
     u = W < 640 ? .52 : W < 1024 ? .78 : 1;
+    // never taller than the stage: the tallest open object, plus its caption, must fit
+    const tallest = Math.max(...items.map((it) => it.h)) * OPEN_SCALE + LIFT;
+    u = Math.min(u, (H - 84) / (tallest + 46));
     renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75)); renderer.setSize(W, H, false);
     camera.aspect = W / H;
     const dist = (H / 2) / Math.tan(camera.fov * D / 2), yc = H / 2 - 46 * u;
@@ -123,7 +129,7 @@ export async function mount(root, base) {
 
   /* ---- pointer ---- */
   const ptr = { x: -1e4, y: -1e4, in: false };
-  canvas.addEventListener('pointermove', (e) => { const r = canvas.getBoundingClientRect(); ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top; ptr.in = true; });
+  canvas.addEventListener('pointermove', (e) => { const r = canvas.getBoundingClientRect(); ptr.x = e.clientX - r.left; ptr.y = e.clientY - r.top; ptr.in = e.pointerType === 'mouse'; follow.style.transform = 'translate(' + (ptr.x + 16) + 'px,' + (ptr.y - 5) + 'px)'; });
   canvas.addEventListener('pointerleave', () => { ptr.in = false; if (!touchPick) hovered = null; });
   let touchPick = false;
   canvas.addEventListener('pointerdown', (e) => {
@@ -182,10 +188,12 @@ export async function mount(root, base) {
     if (hovered && hovered.open > .5 && !hovered.d.book) {
       const [cx, cy] = toScreen(hovered.x0 + hovered.w / 2, hovered.h * u * OPEN_SCALE + LIFT * u + 24);
       capT.textContent = hovered.d.title; capL.textContent = hovered.d.line;
-      cap.style.transform = 'translate(' + Math.round(cx) + 'px,' + Math.round(cy) + 'px) translate(-50%,-100%)';
+      const top = Math.max(cy, cap.offsetHeight + 6);      // keep the caption inside the stage
+      cap.style.transform = 'translate(' + Math.round(cx) + 'px,' + Math.round(top) + 'px) translate(-50%,-100%)';
       cap.classList.add('is-on');
     } else cap.classList.remove('is-on');
     canvas.style.cursor = hovered ? 'pointer' : '';
+    follow.classList.toggle('is-on', ptr.in && !hovered);
     renderer.render(scene, camera);
     if (running) requestAnimationFrame(frame);
   }
