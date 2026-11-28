@@ -485,6 +485,19 @@
   scrl();
   copyEmail();
   document.querySelectorAll('[data-sound]').forEach(function (b) { b.addEventListener('click', function () { Sound.setOn(!Sound.on); }); });
+  // music plays only while this tab is in front: it fades out when the visitor
+  // switches tab or window, and comes back (if it was on) when they return
+  function away(hidden) {
+    if (!Sound.ctx || !Sound.on) return;
+    var c = Sound.ctx, g = Sound.master.gain;
+    g.cancelScheduledValues(c.currentTime); g.setValueAtTime(g.value, c.currentTime);
+    if (hidden) { g.linearRampToValueAtTime(0, c.currentTime + .4); setTimeout(function () { if (Sound.away) c.suspend(); }, 450); }
+    else { c.resume(); g.linearRampToValueAtTime(.85, c.currentTime + 1.2); }
+    Sound.away = hidden;
+  }
+  document.addEventListener('visibilitychange', function () { away(document.hidden); });
+  addEventListener('blur', function () { away(true); });
+  addEventListener('focus', function () { if (!document.hidden) away(false); });
 
   // Returning visitors who chose sound: resume on their first tap (browsers need one)
   if (store.get('sound') === 'on' && (store.sget('entered') || !isHome)) {

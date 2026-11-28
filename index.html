@@ -136,19 +136,23 @@
     </div>
   </section>
 
-  <!-- Skills (to be redesigned) -->
-  <section class="sec" aria-label="Skills">
-    <h2 class="sec-title wrap">What I’m good at</h2>
-    <div class="skills-strip">
-      <div class="skills-track">
-        <article class="skill"><span class="n">i</span><b>Brand strategy</b><p>What a brand stands for, who it’s for and the words that say it.</p></article>
-        <article class="skill"><span class="n">ii</span><b>Design systems</b><p>Systems that survive rebrands and stay recognisable.</p></article>
-        <article class="skill"><span class="n">iii</span><b>Content design</b><p>Dense ideas turned into pages people actually finish.</p></article>
-        <article class="skill"><span class="n">iv</span><b>Search and AI visibility</b><p>Pages that rank on Google and show up in AI answers.</p></article>
-        <article class="skill"><span class="n">v</span><b>Campaigns and launches</b><p>Reports, events and material that sales teams use.</p></article>
-        <article class="skill"><span class="n">vi</span><b>Measurement</b><p>Clean data, so creative decisions rest on evidence.</p></article>
-      </div>
+  <!-- Skills: a shelf of objects sliding past (after the reference video). Books carry
+       the skills; hover a book and it pulls forward and turns to show its cover. -->
+  <section class="sec sec--full shelf-sec" aria-label="Skills" data-shelf>
+    <h2 class="sec-title wrap">What I bring to a brand</h2>
+    <ul class="sr-only">
+      <li>Brand strategy: what a brand stands for, who it’s for and the words that say it.</li>
+      <li>Design systems: systems that survive rebrands and stay recognisable.</li>
+      <li>Content design: dense ideas turned into pages people actually finish.</li>
+      <li>Search and AI visibility: pages that rank on Google and show up in AI answers.</li>
+      <li>Campaigns and launches: reports, events and material that sales teams use.</li>
+      <li>Measurement: clean data, so creative decisions rest on evidence.</li>
+    </ul>
+    <div class="shelf" aria-hidden="true">
+      <div class="shelf-track"></div>
+      <div class="shelf-ledge"></div>
     </div>
+    <p class="shelf-hint">Hover a book to read its cover</p>
   </section>
 
   <!-- The puzzle: one random piece is missing. Scrolling drops it into its gap, then breaks the puzzle apart to show the line. -->

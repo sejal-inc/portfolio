@@ -54,6 +54,25 @@ accent only.
 | `--t-caption` | 12                           | 400    | 1.35        |          | fine print under numbers |
 | `--t-label`   | 11 mono, uppercase           | 400    | 1.4         | 0.14em   | labels and kickers |
 
+**Text styles** (defined once in main.css under "Text styles"; components never set
+their own font, size, weight, line height or tracking)
+
+| Style | Font and token | Where |
+|---|---|---|
+| Display | Geist 300, `--t-display` | intro line, puzzle line, page heads, menu |
+| Title | Geist 300, `--t-h2` | every section title, footer line, case study big lines |
+| Heading | Geist 300, `--t-h3` | project titles, process headlines, number rows |
+| Subheading | Geist 400, `--t-h4` | brand tiles, process tabs |
+| Lead | Geist 300, `--t-lead` | intro paragraphs, process copy |
+| Strong | Geist 500, `--t-body` | card titles |
+| Small | Geist 400, `--t-small`, `--ink-soft` | descriptions, links, hints, meta |
+| Caption | Geist 400, `--t-caption` | fine print under numbers, tile notes |
+| Label | Mono 400, `--t-label`, uppercase | kickers, labels |
+| Button / UI | Geist 450, `--t-small` | buttons, pills, cursor |
+| Focus · Name | Gloock | hero wordmark, nav name |
+| Focus · Number | Gloock, three sizes | result numbers, case study numbers, project stats |
+| Focus · Word | Gloock (`.accent`) | one word in a big line |
+
 **Space** (8-point): 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128 (`--s1`…`--s10`).
 `--gutter` clamp(20, 3.2vw, 48) · `--sec-top` clamp(96, 9vw, 128) (clears the nav) ·
 `--sec-bottom` clamp(48, 5vw, 80) · `--title-gap` clamp(32, 3.4vw, 48).
@@ -82,6 +101,11 @@ accent only.
 - **Section** (`.sec`, `.sec--full`): same top and bottom space everywhere; `--full`
   makes it one screen tall with content centred. Titles (`.sec-title`) are always
   centred and always `--t-h2`.
+- **Shelf** (`.shelf`, "What I bring to a brand"): a slow ledge of CSS 3D books and
+  flat SVG objects (headphones, mug, pencils, sunflower, camera, notebooks, swatches).
+  Each skill is a book; hover pulls it forward and turns it to show the cover. Objects
+  lift and tip with a note. Pauses on hover; tap on touch screens. Skills are also in a
+  hidden list for screen readers.
 - **Cursor**: a 10px ring with a 1px line. It is ink over light surfaces and cream
   over dark ones (anything marked `data-dark`, the footer, the loader, the hero
   while the rays show), with a faint halo for mid tones. No blend modes.
