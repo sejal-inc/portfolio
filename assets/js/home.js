@@ -30,7 +30,33 @@
     new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (tw) { if (visible && !hover) tw.resume(); else tw.pause(); } }, { threshold: .3 }).observe(root);
     show(0);
   }
-  function work() { var r = document.querySelector('[data-work]'); if (r) timedTabs(r, '.work-tab', '.work-bg|.work-card', 7, 'i b'); }
+  /* Selected work: a timed carousel. The line in the top timer fills over 7 seconds,
+     then the next project comes up. Arrows step through; hovering the words pauses;
+     offscreen it waits. */
+  function work() {
+    var r = document.querySelector('[data-work]'); if (!r) return;
+    var bgs = [].slice.call(r.querySelectorAll('.work-bg')), texts = [].slice.call(r.querySelectorAll('.work-text'));
+    var bar = r.querySelector('.work-timer s'), num = r.querySelector('.work-n'), n = bgs.length, i = 0, tw = null, visible = false, hover = false;
+    function show(k, user) {
+      i = (k + n) % n;
+      [bgs, texts].forEach(function (g) { g.forEach(function (el, j) { el.classList.toggle('is-on', j === i); }); });
+      texts.forEach(function (t, j) { t.querySelectorAll('a').forEach(function (a) { a.tabIndex = j === i ? 0 : -1; }); });
+      if (num) num.textContent = ('0' + (i + 1)).slice(-2);
+      if (user && window.SJ.sound) window.SJ.sound.tick(true);
+      if (tw) tw.kill();
+      if (!window.gsap || reduced) return;
+      gsap.set(bar, { scaleX: 0 });
+      tw = gsap.to(bar, { scaleX: 1, duration: 7, ease: 'none', onComplete: function () { show(i + 1); } });
+      if (!visible || hover) tw.pause();
+    }
+    r.querySelector('[data-work-prev]').addEventListener('click', function () { show(i - 1, true); });
+    r.querySelector('[data-work-next]').addEventListener('click', function () { show(i + 1, true); });
+    var words = r.querySelector('.work-texts');
+    words.addEventListener('pointerenter', function () { hover = true; if (tw) tw.pause(); });
+    words.addEventListener('pointerleave', function () { hover = false; if (tw && visible) tw.resume(); });
+    new IntersectionObserver(function (es) { visible = es[0].isIntersecting; if (tw) { if (visible && !hover) tw.resume(); else tw.pause(); } }, { threshold: .4 }).observe(r);
+    show(0);
+  }
   function process() { var r = document.querySelector('[data-process]'); if (r) timedTabs(r, '.proc-tab', '.proc-panel', 6, null); }
 
   /* ---------------- Results: a sideways strip you can drag, or step with the arrows */
@@ -87,6 +113,7 @@
     wrap.innerHTML = '<svg viewBox="0 0 ' + cols * 100 + ' ' + rows * 100 + '" preserveAspectRatio="xMidYMid slice">' +
       list.map(function (p) { return '<path' + (p === gap ? ' class="hole"' : '') + ' d="' + p.d + '"/>'; }).join('') + '</svg>';
     var hole = wrap.querySelector('.hole');
+    stage.setAttribute('data-dark', '');
 
     // the cursor becomes the missing piece: small far away, its true size at the gap,
     // with a hint beside it. Click the gap and the piece drops in.
@@ -98,7 +125,7 @@
     function loop() {
       k += (kt - k) * .18;
       if (cur) cur.style.transform = 'scale(' + k.toFixed(3) + ')';
-      if (hint) hint.style.setProperty('--hx', (done ? 16 : size * k * .42 + 14).toFixed(1) + 'px');
+      if (hint) hint.style.setProperty('--hx', (size * k * .42 + 14).toFixed(1) + 'px');
       raf = Math.abs(kt - k) > .002 ? requestAnimationFrame(loop) : 0;
     }
     if (cur && gap) {
@@ -115,22 +142,28 @@
       });
       addEventListener('resize', function () { size = 0; });
     }
-    stage.addEventListener('click', function (e) {
-      if (done || e.target.closest('a')) return;
-      var r = hole.getBoundingClientRect(), d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
-      if (d > r.width * .6) { if (hint) { hint.textContent = 'Closer…'; setTimeout(function () { if (!done) hint.textContent = 'Complete the puzzle'; }, 1200); } return; }
+    // completing it: bring the piece close and it snaps in; or click anywhere and
+    // it flies in; or just start scrolling and it drops in on its own
+    function complete() {
+      if (done) return;
       done = true;
       hole.classList.add('is-filled');
       if (window.gsap) gsap.fromTo(hole, { scale: 1.3 }, { scale: 1, duration: .6, ease: 'back.out(2)' });
       if (cursorEl) cursorEl.classList.add('is-done');
-      if (hint) { hint.textContent = 'That’s the one. Now scroll.'; if (!raf) raf = requestAnimationFrame(loop); }
+      if (hint) { hint.textContent = 'That’s the one. Now scroll.'; if (!raf) raf = requestAnimationFrame(loop); setTimeout(function () { hint.style.opacity = '0'; }, 2600); }
       if (window.SJ.sound) window.SJ.sound.tick(true);
+    }
+    stage.addEventListener('pointermove', function (e) {
+      if (done) return;
+      var r = hole.getBoundingClientRect();
+      if (Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) < r.width * .35) complete();   // magnetic snap
     });
+    stage.addEventListener('click', function (e) { if (!e.target.closest('a')) complete(); });
 
     if (reduced || !window.gsap) { wrap.style.display = 'none'; return; }
     var paths = wrap.querySelectorAll('path'), solid = list;   // the filled piece breaks away with the rest
     var mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my);
-    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6 } });
+    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6, onUpdate: function (st) { if (st.progress > .04) complete(); stage.toggleAttribute('data-dark', st.progress < .62); } } });   // dark while the pieces cover it
     tl.to({}, { duration: .2 });   // a beat with the gap showing first
     var line = document.querySelector('.puzzle-line');
     gsap.set(line, { opacity: 0 });

@@ -267,10 +267,17 @@
       var copy = document.createElement('span'); copy.className = 'lens-copy'; copy.setAttribute('aria-hidden', 'true'); copy.textContent = el.textContent;
       el.appendChild(copy); lenses.push({ el: el, copy: copy, on: false });
     });
-    var R = 34;
+    var R = 34, frame = 0;
+    // the ring is ink on light surfaces and cream on dark ones, so it never disappears
+    function onDark() {
+      var el = document.elementFromPoint(x, y); if (!el) return false;
+      if (el.closest('[data-dark], .footer, .menu.is-open, .loader, .lost')) return true;
+      return body.classList.contains('rays-on') && !!el.closest('.hero, .intro');
+    }
     (function loop() {
       cx += (x - cx) * (reduced ? 1 : .2); cy += (y - cy) * (reduced ? 1 : .2);
       c.style.transform = 'translate3d(' + cx + 'px,' + cy + 'px,0)';
+      if (++frame % 6 === 0 && x > -100) c.classList.toggle('on-dark', onDark());
       for (var i = 0; i < lenses.length; i++) {
         var L = lenses[i], r = L.el.getBoundingClientRect();
         var near = cx > r.left - R && cx < r.right + R && cy > r.top - R && cy < r.bottom + R;

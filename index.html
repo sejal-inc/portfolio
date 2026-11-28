@@ -52,45 +52,42 @@
     <h2 class="intro-head">I design brands that people understand, find and remember.</h2>
   </section>
 
-  <!-- Selected work: one screen (after Double Play). Full-size image per project; the titles
-       sit over its top centre, each with a line that fills while it plays. -->
-  <section id="work" class="sec work wrap" aria-label="Selected work" data-work>
-    <h2 class="sec-title">Selected work</h2>
-    <div class="work-stage">
-      <div class="work-media">
-        <a class="work-bg is-on" href="case-blog.html" tabindex="-1" aria-hidden="true" data-cursor="work"><div class="art art-blog"></div></a>
-        <a class="work-bg" href="case-linen.html" tabindex="-1" aria-hidden="true" data-cursor="work"><div class="art art-linen"></div></a>
-        <div class="work-bg" aria-hidden="true" data-cursor="work" data-cursor-text="Coming soon"><div class="art art-lantana"></div></div>
-        <div class="work-tabs" role="tablist" aria-label="Projects">
-        <button class="work-tab is-on" type="button" role="tab" aria-selected="true"><i aria-hidden="true"><b></b></i><span>Rebuilt, not repainted</span></button>
-        <button class="work-tab" type="button" role="tab" aria-selected="false"><i aria-hidden="true"><b></b></i><span>Winning back Google</span></button>
-        <button class="work-tab" type="button" role="tab" aria-selected="false"><i aria-hidden="true"><b></b></i><span>An invasive weed, worth bidding on</span></button>
-        </div>
-      </div>
-      <div class="work-cards">
-      <article class="work-card is-on">
+  <!-- Selected work: one full-screen container (after Double Play). Each project's image
+       covers all of it; images leave the lower left clear for the words. A timer at the
+       top centre fills while each project plays, then the next one comes up. -->
+  <section id="work" class="work" aria-label="Selected work" data-work data-dark>
+    <a class="work-bg is-on" href="case-blog.html" data-cursor="work" tabindex="-1" aria-hidden="true"><div class="art art-blog"></div></a>
+    <a class="work-bg" href="case-linen.html" data-cursor="work" tabindex="-1" aria-hidden="true"><div class="art art-linen"></div></a>
+    <div class="work-bg" data-cursor="work" data-cursor-text="Coming soon" aria-hidden="true"><div class="art art-lantana"></div></div>
+    <div class="work-shade" aria-hidden="true"></div>
+    <div class="work-top">
+      <span class="work-kicker">Selected work</span>
+      <div class="work-timer" aria-hidden="true"><b class="work-n">01</b><i><s></s></i><b>03</b></div>
+    </div>
+    <div class="work-texts">
+      <article class="work-text is-on">
         <p class="label">B2B SaaS · Expense management</p>
         <h3>Rebuilt, not repainted</h3>
-        <p>A blog that looked fine and read badly. I rebuilt how it looked, read and was built, three times in three years, and measured every change.</p>
+        <p class="work-desc">A blog that looked fine and read badly. I rebuilt how it looked, read and was built, three times in three years, and measured every change.</p>
         <dl class="work-stats"><div><dt>3</dt><dd>blog design systems</dd></div><div><dt>2</dt><dd>category leaders adopted the format</dd></div><div><dt>16</dt><dd>features, one measurement system</dd></div></dl>
-        <a class="btn" href="case-blog.html">Read case study</a>
+        <a class="btn btn--light" href="case-blog.html">Read case study</a>
       </article>
-      <article class="work-card">
+      <article class="work-text">
         <p class="label">D2C home linen · Search and voice</p>
         <h3>Winning back Google</h3>
-        <p>Sales from search had collapsed. I found out why, rebuilt the brand’s voice and naming, and got its products back near the top of Google in six months.</p>
+        <p class="work-desc">Sales from search had collapsed. I found out why, rebuilt the brand’s voice and naming, and got its products back near the top of Google in six months.</p>
         <dl class="work-stats"><div><dt>+80%</dt><dd>clicks from product searches</dd></div><div><dt>Top 3</dt><dd>on Google for core products</dd></div><div><dt>2.6×</dt><dd>clicks to collection pages</dd></div></dl>
-        <a class="btn" href="case-linen.html">Read case study</a>
+        <a class="btn btn--light" href="case-linen.html">Read case study</a>
       </article>
-      <article class="work-card">
+      <article class="work-text">
         <p class="label">Passion project · Cause campaign</p>
         <h3>An invasive weed, worth bidding on</h3>
-        <p>Lantana is choking forests in the Western Ghats. The Soliga turn it into furniture. I’m building the brand that sells each piece at an invite-only auction.</p>
+        <p class="work-desc">Lantana is choking forests in the Western Ghats. The Soliga turn it into furniture. I’m building the brand that sells each piece at an invite-only auction.</p>
         <dl class="work-stats"><div><dt>2023</dt><dd>started, still growing</dd></div><div><dt>3</dt><dd>partners: makers, research, a brand</dd></div><div><dt>1 of 1</dt><dd>every piece, numbered</dd></div></dl>
         <span class="btn is-soon">Case study coming soon</span>
       </article>
-      </div>
     </div>
+    <div class="work-arrows"><button class="icon-btn icon-btn--dark" type="button" data-work-prev aria-label="Previous project">←</button><button class="icon-btn icon-btn--dark" type="button" data-work-next aria-label="Next project">→</button></div>
   </section>
 
   <!-- Results (after Collins) -->
@@ -157,10 +154,10 @@
 
   <!-- The puzzle: one random piece is missing (the cursor is that piece). Click the gap to drop it in; scrolling breaks the rest apart. -->
   <section class="puzzle" aria-label="About">
-    <div class="puzzle-stage" data-cursor="puzzle" data-dark>
+    <div class="puzzle-stage" data-cursor="puzzle">
       <div class="puzzle-line">
         <p>Every brand is a <span class="gothic">puzzle.</span> I find the piece that’s missing.</p>
-        <a class="btn btn--light" href="about.html">More about me</a>
+        <a class="btn" href="about.html">More about me</a>
       </div>
       <div class="pieces" aria-hidden="true"></div>
     </div>
