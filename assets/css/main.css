@@ -258,7 +258,7 @@ body:not(.rays-on) .rays { opacity: 0; }
 .hero, .intro { position: relative; z-index: 1; }
 .hero { height: 100svh; min-height: 520px; display: grid; align-items: center; color: var(--on-dark); overflow: hidden; }
 .wordmark { margin: 0; padding: 0 var(--gutter); text-align: center; font-family: var(--accent); font-weight: 400; letter-spacing: -0.03em; line-height: .9; white-space: nowrap; color: var(--on-dark); font-size: 12vw; max-width: 100%; overflow: hidden; }
-.wordmark span { display: inline-block; transform-origin: left center; }
+.wordmark span { display: inline-block; transform-origin: left center; text-shadow: 0 2px 40px rgba(18, 16, 17, .18); }
 .scrl { position: absolute; left: 50%; bottom: var(--s6); z-index: 3; transform: translateX(-50%); font: 400 12px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--on-dark); white-space: pre; transition: opacity .5s; }
 .scrl .g { color: var(--on-dark-soft); }
 .intro { display: grid; justify-items: center; align-content: end; text-align: center; min-height: 100svh; padding-top: 24svh; padding-bottom: 14svh; color: var(--on-dark); transition: color .7s var(--ease); }

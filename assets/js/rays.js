@@ -26,27 +26,30 @@
     'float n(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);',
     ' return mix(mix(h(i),h(i+vec2(1,0)),f.x),mix(h(i+vec2(0,1)),h(i+vec2(1,1)),f.x),f.y);}',
     'float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*n(p);p=p*2.03+vec2(4.1,7.3);a*=.5;}return v;}',
-    // palette loop, muted: deep moss, sage, soft lime-sage, cream, muted butter yellow,
-    // blush, soft pink, brand pink, berry, back to moss
+    // palette loop, in an order that blends cleanly (cream sits between green and
+    // pink so they never mix into grey): pink, soft pink, butter yellow, lime, green, cream.
+    // smoothstep holds each colour, so the pure colours dominate and the blends are short.
     'vec3 pal(float t){',
-    ' t=fract(t)*9.;float i=floor(t),f=smoothstep(0.,1.,fract(t));',
-    ' vec3 c0=vec3(.06,.11,.09),c1=vec3(.3,.45,.32),c2=vec3(.72,.8,.58),c3=vec3(.93,.9,.8),c4=vec3(.88,.82,.58),',
-    '      c5=vec3(.93,.84,.82),c6=vec3(.9,.62,.73),c7=vec3(.82,.32,.56),c8=vec3(.3,.07,.17);',
+    ' t=fract(t)*6.;float i=floor(t),f=smoothstep(.25,.75,fract(t));',
+    ' vec3 c0=vec3(.91,.25,.56),c1=vec3(.96,.62,.77),c2=vec3(.98,.84,.42),c3=vec3(.67,.85,.52),c4=vec3(.46,.72,.52),c5=vec3(.96,.93,.86);',
     ' vec3 a=c0,b=c1;',
-    ' if(i==1.){a=c1;b=c2;}else if(i==2.){a=c2;b=c3;}else if(i==3.){a=c3;b=c4;}else if(i==4.){a=c4;b=c5;}',
-    ' else if(i==5.){a=c5;b=c6;}else if(i==6.){a=c6;b=c7;}else if(i==7.){a=c7;b=c8;}else if(i==8.){a=c8;b=c0;}',
+    ' if(i==1.){a=c1;b=c2;}else if(i==2.){a=c2;b=c3;}else if(i==3.){a=c3;b=c4;}else if(i==4.){a=c4;b=c5;}else if(i==5.){a=c5;b=c0;}',
     ' return mix(a,b,f);}',
-    // one layer of warped noise: soft folds of colour
+    // one layer: colour comes from the angle around the vanishing point (warped by
+    // noise), so every frame holds the whole palette; folds add light and shade
     'vec3 layer(vec2 p,float t,float seed){',
-    ' p+=seed;',
-    ' vec2 q=vec2(fbm(p+vec2(0.,t*.07)),fbm(p+vec2(5.2,1.3)-t*.05));',
-    ' float hue=fbm(p*.32+q*.7+vec2(t*.02,-t*.015));',                  // big, slow areas of one colour
-    ' float g=fbm(p*1.3+q*2.+3.1);',                                     // folds: light and shade inside them
-    ' vec3 c=pal(hue*1.5+t*.01+seed*.11);',
-    ' c*=.76+.36*smoothstep(.2,.8,g);',
-    ' float fine=fbm(p*5.5+q*3.5+t*.05);',                                // fine detail the blur stretches into streaks
-    ' c*=.8+.3*smoothstep(.3,.7,fine);',
-    ' float l=dot(c,vec3(.3,.59,.11));c=max(vec3(0.),mix(vec3(l),c,1.3));',
+    ' vec2 q=vec2(fbm(p+seed+vec2(0.,t*.07)),fbm(p+seed+vec2(5.2,1.3)-t*.05));',
+    ' float r=length(p);',
+    ' float ang=atan(p.y,p.x);',
+    // near the centre colour comes only from the flowing field (no point where the
+    // colours meet); further out the angle spreads the whole palette around the frame
+    ' float wave=.5*sin(ang+t*.05)+.18*sin(2.*ang-t*.07);',             // smooth around the circle: no seam
+    ' float hue=wave*smoothstep(.1,.7,r)+(fbm(p*.6+q*1.3+seed)-.5)*.9+t*.028;',
+    ' float g=fbm(p*1.3+q*2.+3.1+seed);',
+    ' vec3 c=pal(hue);',
+    ' c=mix(c*c*1.05,c,.3+.7*smoothstep(.25,.75,g));',                    // folds deepen each colour into its own richer shade (gold, magenta, deep green), never into mud
+    ' float fine=fbm(p*5.5+q*3.5+t*.05+seed);',                         // fine detail the blur stretches into streaks
+    ' c*=.88+.2*smoothstep(.3,.7,fine);',
     ' return c;}',
     'void main(){',
     ' vec2 p=(vUv-uC)*uAsp;',
@@ -77,10 +80,11 @@
     '  acc+=texture2D(uTex,uC+d*(1.-k*.42)).rgb*w;ws+=w;',
     ' }',
     ' vec3 col=acc/ws;',
-    ' float l=dot(col,vec3(.3,.59,.11));col=max(vec3(0.),mix(vec3(l),col,1.18));',   // blending softens colour; win it back
+    ' float l=dot(col,vec3(.3,.59,.11));col=max(vec3(0.),mix(vec3(l),col,1.14));',   // blending softens colour; win it back
     ' col=smoothstep(.02,1.,col);',
-    ' col=mix(col,vec3(1.,.97,.9),exp(-r*5.)*.35);',                     // soft light at the centre, no point
-    ' col*=.9-.25*smoothstep(.4,1.2,r);',
+    ' float band=exp(-pow((vUv.y-.5)*2.6,2.));',                         // where the name sits
+    ' col=mix(col,col*col*1.08,.5*band);',                               // deeper, richer colour behind the white name
+    ' col*=1.-.07*smoothstep(.5,1.3,r);',                              // only a hint of vignette: darkened yellow turns olive
     ' col+=(h(gl_FragCoord.xy*1.3+uTime)-.5)*.03;',                      // grain
     ' gl_FragColor=vec4(col,1.);',
     '}'].join('\n');
