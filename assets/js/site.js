@@ -34,105 +34,119 @@
       var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
       var c = this.ctx = new AC();
       this.master = c.createGain(); this.master.gain.value = 0;
-      var comp = c.createDynamicsCompressor(); comp.threshold.value = -24;
-      this.master.connect(comp).connect(c.destination);
+      /* Gentle glue, then a hard safety limit well below full scale, so stacked
+         chords and echoes can never clip (clipping is heard as crackle). */
+      var comp = c.createDynamicsCompressor();
+      comp.threshold.value = -20; comp.knee.value = 12; comp.ratio.value = 3; comp.attack.value = .02; comp.release.value = .3;
+      var out = c.createGain(); out.gain.value = .6;
+      this.master.connect(comp).connect(out).connect(c.destination);
       var d = c.createDelay(1.5); d.delayTime.value = .42;
-      var fb = c.createGain(); fb.gain.value = .35;
-      var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2400;
+      var fb = c.createGain(); fb.gain.value = .3;
+      var lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2000;
       d.connect(fb).connect(lp).connect(d); d.connect(this.master);
       this.delay = d;
       return c;
     },
     /* A slow, warm loop at 84 bpm: electric-piano chords (FM synthesis),
-       a soft low bass, a quiet heartbeat kick, a swung shaker, vinyl crackle
-       and the odd bell note. Generated live, so there is no file to download. */
+       a soft low bass, a quiet heartbeat kick, a swung shaker and the odd bell
+       note. Generated live, so there is no file to download. Every sound starts
+       and ends on a short fade: an instant jump in level is heard as a click. */
     noiseBuf: function () {
       if (this._nb) return this._nb;
       var c = this.ctx, b = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), d = b.getChannelData(0);
       for (var i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
       return (this._nb = b);
     },
+    env: function (g, t, peak, attack, len) {
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(peak, t + attack);
+      g.gain.setTargetAtTime(0, t + attack, len / 5);      // smooth decay that really reaches silence
+    },
     epiano: function (f, t, vol, len) {
       var c = this.ctx, car = c.createOscillator(), mod = c.createOscillator(), mg = c.createGain(), g = c.createGain(), lp = c.createBiquadFilter();
       car.frequency.value = f; mod.frequency.value = f; car.detune.value = (Math.random() - .5) * 8;
-      mg.gain.setValueAtTime(f * 1.4, t); mg.gain.exponentialRampToValueAtTime(f * .15, t + .6);
-      lp.type = 'lowpass'; lp.frequency.value = 2400;
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .012); g.gain.exponentialRampToValueAtTime(vol * .35, t + .5); g.gain.exponentialRampToValueAtTime(.0001, t + len);
+      mg.gain.setValueAtTime(f * 1.1, t); mg.gain.setTargetAtTime(f * .12, t, .18);
+      lp.type = 'lowpass'; lp.frequency.value = 1800; lp.Q.value = .5;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + .015);
+      g.gain.setTargetAtTime(vol * .4, t + .015, .15); g.gain.setTargetAtTime(0, t + .5, (len - .5) / 5);
       mod.connect(mg).connect(car.frequency); car.connect(lp).connect(g); g.connect(this.master); g.connect(this.delay);
-      car.start(t); mod.start(t); car.stop(t + len + .05); mod.stop(t + len + .05);
+      car.start(t); mod.start(t); car.stop(t + len + .3); mod.stop(t + len + .3);
     },
     bass: function (f, t, len) {
       var c = this.ctx, o = c.createOscillator(), g = c.createGain();
       o.type = 'sine'; o.frequency.value = f;
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.16, t + .03); g.gain.exponentialRampToValueAtTime(.0001, t + len);
-      o.connect(g).connect(this.master); o.start(t); o.stop(t + len + .05);
+      this.env(g, t, .14, .04, len);
+      o.connect(g).connect(this.master); o.start(t); o.stop(t + len + .3);
     },
     kick: function (t) {
       var c = this.ctx, o = c.createOscillator(), g = c.createGain();
-      o.frequency.setValueAtTime(110, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
-      g.gain.setValueAtTime(.22, t); g.gain.exponentialRampToValueAtTime(.0001, t + .32);
-      o.connect(g).connect(this.master); o.start(t); o.stop(t + .35);
+      o.frequency.setValueAtTime(95, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+      this.env(g, t, .18, .006, .3);
+      o.connect(g).connect(this.master); o.start(t); o.stop(t + .5);
     },
     shaker: function (t, vol) {
-      var c = this.ctx, n = c.createBufferSource(), hp = c.createBiquadFilter(), g = c.createGain();
-      n.buffer = this.noiseBuf(); hp.type = 'highpass'; hp.frequency.value = 7200;
-      g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + .05);
-      n.connect(hp).connect(g).connect(this.master); n.start(t, Math.random()); n.stop(t + .06);
+      /* One noise source runs the whole time; each hit just opens and closes
+         its volume. Starting a fresh noise clip per hit caused tiny clicks. */
+      if (!this._sh) {
+        var c = this.ctx, n = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
+        n.buffer = this.noiseBuf(); n.loop = true; bp.type = 'bandpass'; bp.frequency.value = 6000; bp.Q.value = .8; g.gain.value = 0;
+        n.connect(bp).connect(g).connect(this.master); n.start();
+        this._sh = g;
+      }
+      this.env(this._sh, t, vol, .008, .06);
     },
     bell: function (f, t) {
       var c = this.ctx, g = c.createGain();
       [1, 2.76, 5.4].forEach(function (m, i) {
         var o = c.createOscillator(), og = c.createGain(); o.frequency.value = f * m;
-        og.gain.value = [1, .3, .12][i]; o.connect(og).connect(g); o.start(t); o.stop(t + 2.6);
+        og.gain.value = [1, .25, .08][i]; o.connect(og).connect(g); o.start(t); o.stop(t + 3);
       });
-      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.035, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + 2.5);
+      this.env(g, t, .03, .01, 2.5);
       g.connect(this.master); g.connect(this.delay);
     },
-    crackle: function () {
-      var c = this.ctx, b = c.createBuffer(1, c.sampleRate * 3, c.sampleRate), d = b.getChannelData(0);
-      for (var i = 0; i < d.length; i++) d[i] = (Math.random() < .0006 ? (Math.random() * 2 - 1) * .6 : 0) + (Math.random() * 2 - 1) * .012;
-      var s = c.createBufferSource(), bp = c.createBiquadFilter(), g = c.createGain();
-      s.buffer = b; s.loop = true; bp.type = 'bandpass'; bp.frequency.value = 3200; bp.Q.value = .6; g.gain.value = .35;
-      s.connect(bp).connect(g).connect(this.master); s.start();
-      this._crackle = s;
+    prog: [
+      // Fmaj9 · Em7 · Dm9 · Cmaj9
+      { root: 87.31, notes: [174.61, 220, 261.63, 329.63, 392] },
+      { root: 82.41, notes: [164.81, 196, 246.94, 293.66] },
+      { root: 73.42, notes: [146.83, 174.61, 220, 261.63, 329.63] },
+      { root: 65.41, notes: [130.81, 164.81, 196, 246.94, 293.66] }
+    ],
+    penta: [523.25, 587.33, 659.25, 783.99, 880, 1046.5],
+    beat: 60 / 84,
+    /* One eighth note of the loop. */
+    play: function (step, at) {
+      var self = this, beat = this.beat, s8 = step % 8, ch = this.prog[Math.floor(step / 8) % 4], t = at + (s8 % 2 ? beat / 2 * .14 : 0);
+      if (s8 === 0) { ch.notes.forEach(function (f, i) { self.epiano(f, t + i * .018, .04, beat * 3.6); }); self.bass(ch.root, t, beat * 1.6); self.kick(t); }
+      if (s8 === 3) ch.notes.slice(1, 4).forEach(function (f, i) { self.epiano(f, t + i * .012, .022, beat * 1.4); });
+      if (s8 === 4) self.kick(t);
+      if (s8 === 5) self.bass(ch.root, t, beat * .9);
+      self.shaker(t, s8 % 2 ? .014 : .006);
+      if (s8 === 6 && Math.random() < .45) self.bell(this.penta[Math.floor(Math.random() * this.penta.length)], t);
     },
     pad: function () {
-      var self = this, c = this.ctx, beat = 60 / 84, eighth = beat / 2;
-      // Fmaj9 · Em7 · Dm9 · Cmaj9
-      var prog = [
-        { root: 87.31, notes: [174.61, 220, 261.63, 329.63, 392] },
-        { root: 82.41, notes: [164.81, 196, 246.94, 293.66] },
-        { root: 73.42, notes: [146.83, 174.61, 220, 261.63, 329.63] },
-        { root: 65.41, notes: [130.81, 164.81, 196, 246.94, 293.66] }
-      ];
-      var penta = [523.25, 587.33, 659.25, 783.99, 880, 1046.5];
-      if (!this._crackle) this.crackle();
+      var self = this, c = this.ctx, eighth = this.beat / 2;
       var step = 0, next = c.currentTime + .1;
       clearInterval(this.padTimer);
       this.padTimer = setInterval(function () {
         if (!self.on) return;
-        while (next < c.currentTime + .15) {
-          var bar = Math.floor(step / 8) % 4, s8 = step % 8, ch = prog[bar], swing = s8 % 2 ? eighth * .14 : 0, t = next + swing;
-          if (s8 === 0) { ch.notes.forEach(function (f, i) { self.epiano(f, t + i * .018, .045, beat * 3.6); }); self.bass(ch.root, t, beat * 1.6); self.kick(t); }
-          if (s8 === 3) ch.notes.slice(1, 4).forEach(function (f, i) { self.epiano(f, t + i * .012, .026, beat * 1.4); });
-          if (s8 === 4) self.kick(t);
-          if (s8 === 5) self.bass(ch.root, t, beat * .9);
-          self.shaker(t, s8 % 2 ? .02 : .009);
-          if (s8 === 6 && Math.random() < .45) self.bell(penta[Math.floor(Math.random() * penta.length)], t);
-          next += eighth; step++;
-        }
+        if (next < c.currentTime) next = c.currentTime + .05;   // never schedule in the past
+        while (next < c.currentTime + .2) { self.play(step, next); next += eighth; step++; }
       }, 25);
+    },
+    fade: function (to, secs) {
+      var g = this.master.gain, now = this.ctx.currentTime;
+      g.cancelScheduledValues(now); g.setValueAtTime(g.value, now);   // start from where it is: no jump
+      g.linearRampToValueAtTime(to, now + secs);
     },
     setOn: function (v) {
       this.on = v; store.set('sound', v ? 'on' : 'off');
       if (v) {
         if (!this.init()) return;
         this.ctx.resume();
-        this.master.gain.cancelScheduledValues(this.ctx.currentTime);
-        this.master.gain.linearRampToValueAtTime(.85, this.ctx.currentTime + 3);
+        this.fade(.85, 3);
         this.pad();
       } else if (this.ctx) {
-        this.master.gain.linearRampToValueAtTime(0, this.ctx.currentTime + .6);
+        this.fade(0, .6);
         clearInterval(this.padTimer);
       }
       document.querySelectorAll('[data-sound]').forEach(function (b) {
@@ -488,12 +502,11 @@
   // music plays only while this tab is in front: it fades out when the visitor
   // switches tab or window, and comes back (if it was on) when they return
   function away(hidden) {
-    if (!Sound.ctx || !Sound.on) return;
-    var c = Sound.ctx, g = Sound.master.gain;
-    g.cancelScheduledValues(c.currentTime); g.setValueAtTime(g.value, c.currentTime);
-    if (hidden) { g.linearRampToValueAtTime(0, c.currentTime + .4); setTimeout(function () { if (Sound.away) c.suspend(); }, 450); }
-    else { c.resume(); g.linearRampToValueAtTime(.85, c.currentTime + 1.2); }
+    if (!Sound.ctx || !Sound.on || Sound.away === hidden) return;
+    var c = Sound.ctx;
     Sound.away = hidden;
+    if (hidden) { Sound.fade(0, .4); setTimeout(function () { if (Sound.away) c.suspend(); }, 500); }
+    else { c.resume().then(function () { Sound.fade(.85, 1.2); }); }
   }
   document.addEventListener('visibilitychange', function () { away(document.hidden); });
   addEventListener('blur', function () { away(true); });
