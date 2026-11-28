@@ -234,12 +234,15 @@
     if (body.getAttribute('data-footer') === 'off') return;
     var f = document.createElement('footer');
     f.className = 'footer';
-    var map = [['index.html', 'Home'], ['work.html', 'Selected work'], ['case-blog.html', 'Rebuilt, not repainted'], ['case-linen.html', 'Winning back Google'], ['backyard.html', 'Backyard'], ['about.html', 'About']];
+    var pages = [['index.html', 'Home'], ['work.html', 'Selected work'], ['backyard.html', 'Backyard'], ['about.html', 'About']];
+    var social = [[INSTAGRAM, 'Instagram'], [LINKEDIN, 'LinkedIn'], ['mailto:' + EMAIL, 'Email']];
     f.innerHTML =
-      '<p class="footer-msg">Thanks for staying till the <span class="accent">end.</span> Now go make something you’re proud of.</p>' +
-      '<nav class="footer-nav" aria-label="Sitemap">' + map.map(function (l) { return '<a class="pill" href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
-      '<div class="footer-social"><a class="pill" href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram ↗</a><a class="pill" href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a class="pill" href="mailto:' + EMAIL + '">Email ↗</a></div>' +
-      '<small>© 2026 Sejal Jain</small>';
+      '<p class="footer-msg">Thanks for staying till the end.<br>Now go make something you’re <span class="accent">proud</span> of.</p>' +
+      '<div class="footer-cols">' +
+        '<nav class="footer-col" aria-label="Elsewhere"><span class="label">Elsewhere</span>' + social.map(function (l) { return '<a href="' + l[0] + '"' + (l[0].indexOf('http') === 0 ? ' target="_blank" rel="noopener"' : '') + '>' + l[1] + ' <span aria-hidden="true">↗</span></a>'; }).join('') + '</nav>' +
+        '<nav class="footer-col footer-col--r" aria-label="Pages"><span class="label">Pages</span>' + pages.map(function (l) { return '<a href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
+      '</div>' +
+      '<div class="footer-base"><small>© 2026 Sejal Jain</small><small>Mumbai, India</small></div>';
     body.appendChild(f);
     var pg = document.querySelector('.page');
     if (!pg) return;
@@ -256,7 +259,7 @@
     if (!fine) return;
     var c = document.createElement('div');
     c.className = 'cursor'; c.setAttribute('aria-hidden', 'true');
-    c.innerHTML = '<span class="ring"></span><span class="work"><span class="t">View case study</span></span>';
+    c.innerHTML = '<span class="ring"></span><span class="cur-pill"><span class="t">View case study</span></span>';
     body.appendChild(c);
     root.classList.add('has-cursor');
     var label = c.querySelector('.t'), x = -200, y = -200, cx = x, cy = y, lenses = [];
@@ -276,10 +279,15 @@
     document.addEventListener('pointerleave', function () { x = y = -200; });
 
     // pink lens: wrap each .lens number with a pink copy, clipped to the cursor
-    document.querySelectorAll('.lens').forEach(function (el) {
-      var copy = document.createElement('span'); copy.className = 'lens-copy'; copy.setAttribute('aria-hidden', 'true'); copy.textContent = el.textContent;
-      el.appendChild(copy); lenses.push({ el: el, copy: copy, on: false });
-    });
+    function lensScan() {   // also called after a section rebuilds its cards
+      lenses = [];
+      document.querySelectorAll('.lens').forEach(function (el) {
+        var copy = el.querySelector('.lens-copy');
+        if (!copy) { copy = document.createElement('span'); copy.className = 'lens-copy'; copy.setAttribute('aria-hidden', 'true'); copy.textContent = el.textContent; el.appendChild(copy); }
+        lenses.push({ el: el, copy: copy, on: false });
+      });
+    }
+    lensScan(); window.SJ.lensScan = lensScan;
     var R = 34, frame = 0;
     // the ring is ink on light surfaces and cream on dark ones, so it never disappears
     function onDark() {
@@ -481,6 +489,43 @@
     items.forEach(function (n) { io.observe(n); });
   }
 
+  /* ------------------------------------------------------------------ Snap
+     Full-screen sections marked data-snap never stop half on screen. When
+     scrolling settles inside or next to one, the page glides on, in the
+     direction it was going, to the nearest clean edge: the section filling the
+     screen, or the section fully gone. */
+  function snapSections() {
+    var els = [].slice.call(document.querySelectorAll('[data-snap]')); if (!els.length) return;
+    var last = scrollY, dir = 1, timer = null, gliding = false;
+    function docTop(el) { return el.getBoundingClientRect().top + scrollY; }
+    function settle() {
+      if (gliding || document.querySelector('.menu.is-open')) return;
+      var y = scrollY, vh = innerHeight, stops = [], inside = false;
+      els.forEach(function (el) {
+        var t = docTop(el), h = el.offsetHeight;
+        if (y > t - vh + 2 && y < t + h - 2) inside = true;
+        stops.push(t - vh, t, t + h - vh, t + h);
+      });
+      if (!inside) return;
+      stops = stops.filter(function (v, i, a) { return a.indexOf(v) === i; }).sort(function (a, b) { return a - b; });
+      if (stops.some(function (v) { return Math.abs(v - y) < 3; })) return;   // already clean
+      var target = dir > 0 ? stops.filter(function (v) { return v > y; })[0] : stops.filter(function (v) { return v < y; }).pop();
+      if (target === undefined) return;
+      // a tiny nudge past a clean edge should come back, not throw the page a full screen
+      var back = dir > 0 ? stops.filter(function (v) { return v < y; }).pop() : stops.filter(function (v) { return v > y; })[0];
+      if (back !== undefined && Math.abs(y - back) < 40) target = back;
+      gliding = true;
+      var done = function () { gliding = false; last = scrollY; };
+      if (window.SJ.lenis) window.SJ.lenis.scrollTo(target, { duration: .9, easing: function (t) { return 1 - Math.pow(1 - t, 3); }, onComplete: done });
+      else { scrollTo({ top: target, behavior: 'smooth' }); setTimeout(done, 900); }
+    }
+    function onScroll() {
+      var y = scrollY; if (y !== last) dir = y > last ? 1 : -1; last = y;
+      clearTimeout(timer); if (!gliding) timer = setTimeout(settle, 160);
+    }
+    if (window.SJ.lenis) window.SJ.lenis.on('scroll', onScroll); else addEventListener('scroll', onScroll, { passive: true });
+  }
+
   /* ------------------------------------------------------------------ Start */
   if (window.gsap) { if (window.ScrollTrigger) gsap.registerPlugin(ScrollTrigger); if (window.ScrollToPlugin) gsap.registerPlugin(ScrollToPlugin); }
   if (window.Lenis && !reduced) {
@@ -495,6 +540,7 @@
   buildFooter();
   buildCursor();
   anchors();
+  snapSections();
   pageTransition();
   scrl();
   copyEmail();

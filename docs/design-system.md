@@ -71,7 +71,9 @@ their own font, size, weight, line height or tracking)
 | Button / UI | Geist 450, `--t-small` | buttons, pills, cursor |
 | Focus · Name | Gloock | hero wordmark, nav name |
 | Focus · Number | Gloock, three sizes | result numbers, case study numbers, project stats |
-| Focus · Word | Gloock (`.accent`) | one word in a big line |
+| Focus · Title | Gloock, `--t-h2` | project names in Selected work |
+| Focus · Subheading | Gloock, `--t-h4` | names of things on the shelf |
+| Focus · Word | Gloock (`.accent`) | one word in every section title and big line; turns pink on hover |
 
 **Space** (8-point): 4 · 8 · 12 · 16 · 24 · 32 · 48 · 64 · 96 · 128 (`--s1`…`--s10`).
 `--gutter` clamp(20, 3.2vw, 48) · `--sec-top` clamp(96, 9vw, 128) (clears the nav) ·
@@ -101,11 +103,17 @@ their own font, size, weight, line height or tracking)
 - **Section** (`.sec`, `.sec--full`): same top and bottom space everywhere; `--full`
   makes it one screen tall with content centred. Titles (`.sec-title`) are always
   centred and always `--t-h2`.
-- **Shelf** (`.shelf`, "What I bring to a brand"): a slow ledge of CSS 3D books and
-  flat SVG objects (headphones, mug, pencils, sunflower, camera, notebooks, swatches).
-  Each skill is a book; hover pulls it forward and turns it to show the cover. Objects
-  lift and tip with a note. Pauses on hover; tap on touch screens. Skills are also in a
-  hidden list for screen readers.
+- **Shelf** (`.shelf3d`, "What I bring to a brand"): a slow 3D row of real objects
+  (Poly Haven models, CC0, packed small by `tools/pack_glb.py`) and printed books,
+  drawn with three.js and loaded only when the section comes near. Hover one: it
+  turns to face you and the row makes room for it (after the bookshelf reference).
+  Each object has a title in Gloock and one line. Without WebGL, a plain list shows.
+- **Results** (`.results-loop`): an endless row of every number from both case
+  studies. Drifts on its own, pauses on hover, can be dragged; no first or last card.
+- **Snap** (`data-snap`): full-screen sections never stop half on screen; the page
+  glides to the nearest clean edge in the direction you were scrolling.
+- **Footer**: a two-line message, then two stacked columns: Elsewhere (Instagram,
+  LinkedIn, Email) on the left, Pages on the right.
 - **Cursor**: a 10px ring with a 1px line. It is ink over light surfaces and cream
   over dark ones (anything marked `data-dark`, the footer, the loader, the hero
   while the rays show), with a faint halo for mid tones. No blend modes.
@@ -125,4 +133,4 @@ their own font, size, weight, line height or tracking)
 ## 6. Revisit when
 
 - Real case study images and videos arrive (check text space on the left of each).
-- The footer and "What I'm good at" are redesigned.
+- Real photos replace the placeholder art (case study images, About photos).
