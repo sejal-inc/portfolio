@@ -58,6 +58,16 @@ accent only.
 `--gutter` clamp(20, 3.2vw, 48) · `--sec-top` clamp(96, 9vw, 128) (clears the nav) ·
 `--sec-bottom` clamp(48, 5vw, 80) · `--title-gap` clamp(32, 3.4vw, 48).
 
+**Fonts** (both self-hosted, both free under the Open Font License)
+- **Geist** (`--sans`) does everything: nav, body, section titles, buttons, labels.
+- **Gloock** (`--accent`), a sharp, high-contrast display serif, is the one voice that
+  stands out. It is used only for: the name (hero wordmark and the small name in the
+  nav), one accent word in a big statement (`<span class="accent">`), and key numbers
+  (results cards, project numbers, case study numbers). Never for body text or titles.
+- Chosen Nov 2026 after comparing nine display faces with Geist; it replaced the
+  gothic (UnifrakturMaguntia). The pairing follows the reference sites: a quiet
+  workhorse sans plus one distinctive face used sparingly.
+
 **Shape**: `--r-sm` 12 (small boxes) · `--r-md` 20 (cards, tiles, images) ·
 `--r-lg` 28 (large panels) · `--r-pill` 999.
 
@@ -91,5 +101,4 @@ accent only.
 ## 6. Revisit when
 
 - Real case study images and videos arrive (check text space on the left of each).
-- The font pairing is chosen (only `--sans` and an accent token change).
 - The footer and "What I'm good at" are redesigned.

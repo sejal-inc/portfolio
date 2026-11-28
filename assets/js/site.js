@@ -222,7 +222,7 @@
     f.className = 'footer';
     var map = [['index.html', 'Home'], ['work.html', 'Selected work'], ['case-blog.html', 'Rebuilt, not repainted'], ['case-linen.html', 'Winning back Google'], ['backyard.html', 'Backyard'], ['about.html', 'About']];
     f.innerHTML =
-      '<p class="footer-msg">Thanks for staying till the <span class="gothic">end.</span> Now go make something you’re proud of.</p>' +
+      '<p class="footer-msg">Thanks for staying till the <span class="accent">end.</span> Now go make something you’re proud of.</p>' +
       '<nav class="footer-nav" aria-label="Sitemap">' + map.map(function (l) { return '<a class="pill" href="' + l[0] + '">' + l[1] + '</a>'; }).join('') + '</nav>' +
       '<div class="footer-social"><a class="pill" href="' + INSTAGRAM + '" target="_blank" rel="noopener">Instagram ↗</a><a class="pill" href="' + LINKEDIN + '" target="_blank" rel="noopener">LinkedIn ↗</a><a class="pill" href="mailto:' + EMAIL + '">Email ↗</a></div>' +
       '<small>© 2026 Sejal Jain</small>';
