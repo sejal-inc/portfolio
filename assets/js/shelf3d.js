@@ -59,6 +59,9 @@ export async function mount(root, base) {
 
   /* ---- build every item ---- */
   const loader = new GLTFLoader();
+  // where each model lives: assets/models/ in the repo; the preview host keeps them elsewhere
+  let where = {};
+  try { where = await (await fetch(base + 'assets/models/models.json')).json(); } catch (e) {}
   const items = await Promise.all(ITEMS.map(async (d) => {
     const it = { d, open: 0, target: 0, push: 0 };
     const spin = new THREE.Group(), lift = new THREE.Group();
@@ -66,7 +69,8 @@ export async function mount(root, base) {
     if (d.book) {
       spin.add(book(d)); it.sx = d.W; it.sz = d.T; it.h = d.H; it.face = 0; it.idle = 90;
     } else {
-      const g = (await loader.loadAsync(base + 'assets/models/' + d.file + '.glb')).scene;
+      const url = where[d.file] || (base + 'assets/models/' + d.file + '.glb');
+      const g = (await loader.loadAsync(url)).scene;
       (d.hide || []).forEach((n) => { const o = g.getObjectByName(n); if (o) o.visible = false; });
       g.traverse((o) => {
         if (!o.isMesh) return;

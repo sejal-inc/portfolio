@@ -1,0 +1,15 @@
+{
+ "Camera_01": "assets/models/Camera_01.glb",
+ "Megaphone_01": "assets/models/Megaphone_01.glb",
+ "dartboard": "assets/models/dartboard.glb",
+ "desk_lamp_arm_01": "assets/models/desk_lamp_arm_01.glb",
+ "lightbulb_01": "assets/models/lightbulb_01.glb",
+ "magnifying_glass_01": "assets/models/magnifying_glass_01.glb",
+ "measuring_tape_01": "assets/models/measuring_tape_01.glb",
+ "modified_thermos": "assets/models/modified_thermos.glb",
+ "portable_cassette_player": "assets/models/portable_cassette_player.glb",
+ "round_spectacles": "assets/models/round_spectacles.glb",
+ "rubber_duck_toy": "assets/models/rubber_duck_toy.glb",
+ "seadogs_compass": "assets/models/seadogs_compass.glb",
+ "vintage_video_camera": "assets/models/vintage_video_camera.glb"
+}
