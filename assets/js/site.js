@@ -242,7 +242,7 @@
     if (!fine) return;
     var c = document.createElement('div');
     c.className = 'cursor'; c.setAttribute('aria-hidden', 'true');
-    c.innerHTML = '<span class="ring"></span><span class="work">' + PIECE_SVG + '<span class="t">View case study</span></span><span class="piece">' + PIECE_SVG + '</span>';
+    c.innerHTML = '<span class="ring"></span><span class="work"><span class="t">View case study</span></span>';
     body.appendChild(c);
     root.classList.add('has-cursor');
     var label = c.querySelector('.t'), x = -200, y = -200, cx = x, cy = y, lenses = [];
@@ -254,7 +254,6 @@
       var l = e.target.closest('a, button, [role="button"]');
       if (l && l.classList.contains('loader-go')) l = null;   // the loader's full-screen button keeps the ring small
       c.classList.toggle('is-work', kind === 'work');
-      c.classList.toggle('is-puzzle', kind === 'puzzle');
       c.classList.toggle('is-lens', !!e.target.closest('.lens'));
       if (kind === 'work') label.textContent = t.getAttribute('data-cursor-text') || 'View case study';
       c.classList.toggle('is-link', !kind && !!l);

@@ -1,5 +1,5 @@
 /* Homepage: timed work carousel, results strip, process tabs, the skills strip, and the puzzle
-   (a random piece is missing; the cursor is that piece) that breaks apart as you scroll. */
+   (a random piece is missing; scrolling drops it in, then breaks the puzzle apart). */
 (function () {
   'use strict';
   var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -115,63 +115,25 @@
     var hole = wrap.querySelector('.hole');
     stage.setAttribute('data-dark', '');
 
-    // the cursor becomes the missing piece: small far away, its true size at the gap,
-    // with a hint beside it. Click the gap and the piece drops in.
-    var cursorEl = document.querySelector('.cursor'), cur = cursorEl && cursorEl.querySelector('.piece'), done = false;
-    var hint = null;
-    if (cursorEl) { hint = document.createElement('span'); hint.className = 'hint'; hint.textContent = 'Complete the puzzle'; cursorEl.appendChild(hint); }
-    var size = 0, k = .3, kt = .3, raf = 0;
-    function fit() { var r = hole.getBoundingClientRect(); size = r.width / 100 * 160; if (cur) { cur.style.width = cur.style.height = size + 'px'; cur.style.margin = (-size / 2) + 'px 0 0 ' + (-size / 2) + 'px'; } }
-    function loop() {
-      k += (kt - k) * .18;
-      if (cur) cur.style.transform = 'scale(' + k.toFixed(3) + ')';
-      if (hint) hint.style.setProperty('--hx', (size * k * .42 + 14).toFixed(1) + 'px');
-      raf = Math.abs(kt - k) > .002 ? requestAnimationFrame(loop) : 0;
-    }
-    if (cur && gap) {
-      var x = gap.c * 100, y = gap.r * 100;
-      cur.style.transition = 'opacity .25s';
-      cur.innerHTML = '<svg viewBox="' + (x - 30) + ' ' + (y - 30) + ' 160 160"><path d="' + gap.d + '" fill="currentColor"/></svg>';
-      stage.addEventListener('pointermove', function (e) {
-        if (done) return;
-        if (!size) fit();
-        var r = hole.getBoundingClientRect(), d = Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2));
-        kt = .28 + .72 * Math.pow(1 - Math.min(1, d / (Math.hypot(innerWidth, innerHeight) * .55)), 2.2);   // closer to the gap, bigger the piece
-        if (d < r.width * .18) kt = 1;
-        if (!raf) raf = requestAnimationFrame(loop);
-      });
-      addEventListener('resize', function () { size = 0; });
-    }
-    // completing it: bring the piece close and it snaps in; or click anywhere and
-    // it flies in; or just start scrolling and it drops in on its own
-    function complete() {
-      if (done) return;
-      done = true;
-      hole.classList.add('is-filled');
-      if (window.gsap) gsap.fromTo(hole, { scale: 1.3 }, { scale: 1, duration: .6, ease: 'back.out(2)' });
-      if (cursorEl) cursorEl.classList.add('is-done');
-      if (hint) { hint.textContent = 'That’s the one. Now scroll.'; if (!raf) raf = requestAnimationFrame(loop); setTimeout(function () { hint.style.opacity = '0'; }, 2600); }
-      if (window.SJ.sound) window.SJ.sound.tick(true);
-    }
-    stage.addEventListener('pointermove', function (e) {
-      if (done) return;
-      var r = hole.getBoundingClientRect();
-      if (Math.hypot(e.clientX - (r.left + r.width / 2), e.clientY - (r.top + r.height / 2)) < r.width * .35) complete();   // magnetic snap
-    });
-    stage.addEventListener('click', function (e) { if (!e.target.closest('a')) complete(); });
+    // the missing piece, waiting off screen; scrolling brings it in
+    var svg = wrap.querySelector('svg'), drop = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    drop.setAttribute('d', gap.d); drop.setAttribute('class', 'drop'); svg.appendChild(drop);
 
     if (reduced || !window.gsap) { wrap.style.display = 'none'; return; }
-    var paths = wrap.querySelectorAll('path'), solid = list;   // the filled piece breaks away with the rest
-    var mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my);
-    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6, onUpdate: function (st) { if (st.progress > .04) complete(); stage.toggleAttribute('data-dark', st.progress < .62); } } });   // dark while the pieces cover it
-    tl.to({}, { duration: .2 });   // a beat with the gap showing first
-    var line = document.querySelector('.puzzle-line');
+    var mx = cols * 50, my = rows * 50, maxD = Math.hypot(mx, my), line = document.querySelector('.puzzle-line');
+    var tl = gsap.timeline({ scrollTrigger: { trigger: '.puzzle', start: 'top top', end: 'bottom bottom', scrub: .6,
+      onUpdate: function (st) { stage.toggleAttribute('data-dark', st.progress < .62); } } });   // dark while the pieces cover it
     gsap.set(line, { opacity: 0 });
-    tl.to(line, { opacity: 1, duration: .5, ease: 'none' }, .45);   // the line shows only as the pieces leave
+    // 1. the missing piece drops in from above and settles into its gap
+    tl.fromTo(drop, { y: -(gap.cy + 260), x: 140, rotation: -38, scale: 1.15 }, { y: 0, x: 0, rotation: 0, scale: 1, duration: .22, ease: 'power3.out' }, .02);
+    // 2. a beat with the puzzle complete, then the whole thing breaks apart from the centre out
+    tl.to(line, { opacity: 1, duration: .5, ease: 'none' }, .5);   // the line shows only as the pieces leave
+    var paths = [].slice.call(wrap.querySelectorAll('path:not(.hole):not(.drop)')), solid = list.filter(function (p) { return p !== gap; });
+    paths.push(drop); solid.push(gap);
     paths.forEach(function (el, i) {
       var p = solid[i], dx = p.cx - mx, dy = p.cy - my, dist = Math.hypot(dx, dy) / maxD;
       var a = Math.atan2(dy, dx), push = 600 + Math.random() * 500;
-      tl.to(el, { x: Math.cos(a) * push, y: Math.sin(a) * push, rotation: (Math.random() - .5) * 140, scale: .3, opacity: 0, ease: 'power2.in', duration: 1 }, .2 + dist * .9);   // the centre breaks open first
+      tl.to(el, { x: Math.cos(a) * push, y: Math.sin(a) * push, rotation: (Math.random() - .5) * 140, scale: .3, opacity: 0, ease: 'power2.in', duration: 1 }, .34 + dist * .8);
     });
   }
 
